@@ -1,4 +1,4 @@
-# Kunskapskontroll 2: Robust inköpslista
+# Kunskapskontroll 2: Robust inköpslista 
 
 Startkoden är en inköpslista i C# som sparar varorna i `items.txt` mellan körningarna. Den byggde utan fel men fungerade inte. Här rättas felen ett i taget, i små steg.
 
@@ -11,6 +11,8 @@ dotnet run
 ```
 
 ## Flödesschema
+
+(Fixa bugg så hela låten spelas)
 
 [Klickbart flödesschema över startkoden](https://aliteex55-bit.github.io/Del1-2brooor/flodesschema.html). Röda etiketter som 1-1 visar var felen fanns, fel och lager. I läget Lösning blir de gröna och visar koden efter lagningen.
 
