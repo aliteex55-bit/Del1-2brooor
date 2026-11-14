@@ -12,7 +12,7 @@ dotnet run
 
 ## Flödesschema
 
-(Fixa bugg så hela låten spelas)
+Sidan öppnar i läget Dance: låten The Farm Called C-Sharp spelas, och raden som sjungs lyser upp det den handlar om i flödet, klassdiagrammet och koden, i takt med musiken. Problem och Lösning finns bredvid.
 
 [Klickbart flödesschema över startkoden](https://aliteex55-bit.github.io/Del1-2brooor/flodesschema.html). Röda etiketter som 1-1 visar var felen fanns, fel och lager. I läget Lösning blir de gröna och visar koden efter lagningen.
 
