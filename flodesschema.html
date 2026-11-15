@@ -203,6 +203,72 @@ body.view-fix .vstart, body.view-bug .vnow { display: none; }
 .beatbar span { width: 10px; height: 10px; border-radius: 50%; background: var(--line); transition: background .08s, transform .08s; }
 .beatbar span.on { background: var(--ok); transform: scale(1.35); }
 .beatbar span.on:first-child { background: var(--mark); transform: scale(1.7); }
+#buildpane { padding: 0; overflow: hidden; display: flex; flex-direction: column; container-type: size; }
+.bvs { flex: 1; min-height: 0; display: flex; flex-direction: column; background: #1e1e1e; color: #d4d4d4; font: 13px/1.45 "Segoe UI", system-ui, sans-serif; }
+.bvs-top { display: flex; align-items: center; gap: 12px; padding: 4px 12px; min-height: 30px; background: #03111e; border-bottom: 1px solid rgba(98, 243, 255, .3); }
+.bvs-lyric { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; color: #fff; text-shadow: 0 0 10px rgba(91, 140, 255, .8); }
+.bvs-prog { flex: none; font-size: 11.5px; letter-spacing: .12em; color: rgba(170, 225, 250, .8); }
+.bvs-main { flex: 1; min-height: 0; display: grid; grid-template-columns: 40px 210px minmax(0, 1fr); }
+.bvs-act { background: #333; display: flex; flex-direction: column; align-items: center; gap: 16px; padding-top: 12px; }
+.bvs-act i { width: 20px; height: 20px; border: 2px solid #858585; border-radius: 4px; }
+.bvs-act i.on { border-color: #fff; box-shadow: -11px 0 0 -8px #fff; }
+.bvs-side { background: #252526; padding: 8px 0; overflow: auto; font-size: 13px; scrollbar-width: thin; }
+.bvs-side h5 { margin: 0 12px 6px; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #bbb; font-weight: 600; }
+.bvs-side h5.bvs-sec { margin-top: 14px; }
+.bvs-file { display: flex; align-items: center; gap: 6px; padding: 3px 10px 3px 16px; color: #ccc; white-space: nowrap; }
+.bvs-file.on { background: #37373d; color: #fff; }
+.bvs-file .ic { flex: none; font: 700 10px Consolas, monospace; color: #b180d7; }
+.bvs-file .ic.txt { color: #cbcb41; }
+.bvs-file .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.bvs-file .st { flex: none; margin-left: auto; font-size: 11px; color: #6e7681; }
+.bvs-file .st.ok { color: #73c991; }
+.bvs-file .st.w { color: #e2c08d; }
+.bvs-bar { height: 3px; margin: 1px 10px 6px 34px; background: #3c3c3c; }
+.bvs-bar i { display: block; height: 100%; background: #62f3ff; box-shadow: 0 0 6px #62f3ff; }
+.bvs-map div { padding: 2px 10px 2px 16px; font-size: 12px; color: #8b8b8b; }
+.bvs-map div.on { color: #fff; }
+.bvs-map b { color: #5b8cff; font-weight: 600; }
+.bvs-ed { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.bvs-tabs { display: flex; min-height: 32px; background: #252526; overflow: hidden; }
+.bvs-tabs span { padding: 7px 14px; font-size: 12.5px; color: #969696; border-right: 1px solid #1e1e1e; white-space: nowrap; }
+.bvs-tabs span.on { background: #1e1e1e; color: #fff; box-shadow: inset 0 2px 0 #62f3ff; }
+.bvs-crumbs { padding: 2px 14px; font-size: 12px; color: #a0a0a0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bvs-code { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 64px; }
+.bvs-lines { position: relative; overflow: auto; padding: 2px 0 30px; font: 13px/1.6 "Cascadia Mono", Consolas, monospace; scrollbar-width: thin; }
+.bln { white-space: pre; padding-right: 12px; }
+.bln .n { display: inline-block; width: 48px; padding-right: 14px; text-align: right; color: #6e7681; user-select: none; }
+.bln.todo { opacity: .16; }
+.bln.fresh { background: rgba(98, 243, 255, .08); box-shadow: inset 3px 0 0 #62f3ff; }
+.bln.cur { background: rgba(255, 255, 255, .06); }
+.bln.hit { background: rgba(224, 176, 64, .16); box-shadow: inset 3px 0 0 #e0b040; }
+.bln.cur .n { color: #c6c6c6; }
+.bcaret { display: inline-block; width: 2px; height: 1.1em; margin-left: 1px; vertical-align: -2px; background: #aeafad; box-shadow: 0 0 6px #fff; animation: bblink 1s steps(1) infinite; }
+@keyframes bblink { 50% { opacity: 0; } }
+.blens { padding-left: 62px; font: italic 12px "Segoe UI", sans-serif; color: #5b8cff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bvs-mini { position: relative; border-left: 1px solid #2b2b2b; }
+.bvs-mini canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.bvs-term { flex: 0 0 30%; min-height: 80px; display: flex; flex-direction: column; border-top: 1px solid #3c3c3c; background: #1e1e1e; }
+.bvs-th { display: flex; gap: 20px; padding: 5px 14px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #969696; }
+.bvs-th .on { color: #fff; border-bottom: 1px solid #fff; }
+.bvs-term pre { flex: 1; min-height: 0; overflow: auto; margin: 0; padding: 2px 14px 8px; font: 12.5px/1.5 "Cascadia Mono", Consolas, monospace; color: #ccc; white-space: pre-wrap; scrollbar-width: thin; }
+.bvs-term .ok { color: #23d18b; }
+.bvs-term .dim { color: #6e7681; }
+.bvs-term .y { color: #e5e510; }
+.bvs-status { display: flex; gap: 16px; align-items: center; padding: 0 10px; min-height: 22px; background: #007acc; color: #fff; font-size: 12px; white-space: nowrap; overflow: hidden; }
+.bvs-status .r { margin-left: auto; display: flex; gap: 16px; }
+.bvs .t-kw { color: #569cd6; }
+.bvs .t-type { color: #4ec9b0; }
+.bvs .t-str { color: #ce9178; }
+.bvs .t-com { color: #6a9955; font-style: normal; }
+.bvs .t-num { color: #b5cea8; }
+.bln.bop { animation: blnbop .3s ease-out; }
+.bln.bop-down { animation: blnbop1 .5s ease-out; }
+@keyframes blnbop { from { background: rgba(98, 243, 255, .28); } }
+@keyframes blnbop1 { from { background: rgba(199, 155, 234, .5); box-shadow: inset 4px 0 0 #c79bea; } }
+@media (prefers-reduced-motion: reduce) { .bln.bop, .bln.bop-down, .bcaret { animation: none; } }
+@container (max-height: 460px) { .bvs-term { flex-basis: 24%; min-height: 56px; } .bvs-crumbs { display: none; } }
+@container (max-height: 320px) { .bvs-term, .bvs-top { display: none; } }
+@container (max-width: 640px) { .bvs-main { grid-template-columns: minmax(0, 1fr); } .bvs-act, .bvs-side, .bvs-mini { display: none; } .bvs-code { grid-template-columns: minmax(0, 1fr); } }
 .pbeats { display: none; gap: 6px; align-items: center; margin: 0 6px; }
 body.view-dance .pbeats { display: flex; }
 .pbeats span { width: 8px; height: 8px; border-radius: 50%; background: var(--line); transition: background .08s, transform .08s; }
@@ -354,6 +420,7 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
   .splitter { display: none; }
   .psplit.row, .psplit.col { flex-direction: column; }
   .psplit > *, .pgroup > .pane { flex: none !important; }
+  #buildpane { flex: none; height: 85vh; }
   #codepane { max-height: 75vh; }
   #runpane { max-height: 90vh; }
   #chart { border-right: 0; border-bottom: 1px solid var(--line); }
@@ -573,7 +640,7 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
   <button type="button" class="codebtn" id="codebtn">Hela koden</button>
   <button type="button" class="codebtn" id="cdbtn">Klassdiagram</button>
   <button type="button" class="codebtn runbtn" id="runbtn">Kör programmet</button>
-  <details class="laymenu" id="laymenu"><summary>Layout ▾</summary><div class="laypop"><h4>Färdiga layouter</h4><div class="presets"><button type="button" data-preset="alla"><span class="thumb" style="grid-template-columns: repeat(4, 1fr)" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Allt sida vid sida</button><button type="button" data-preset="2x2"><span class="thumb" style="grid-template-columns: 1.3fr 1fr; grid-template-rows: 1fr 1fr" aria-hidden="true"><i></i><i></i><i></i><i></i></span>2 uppe, 2 nere</button><button type="button" data-preset="3+1"><span class="thumb" style="grid-template-columns: repeat(3, 1fr); grid-template-rows: 1.6fr 1fr" aria-hidden="true"><i></i><i></i><i></i><i style="grid-column: 1 / 4"></i></span>3 uppe, 1 nere</button><button type="button" data-preset="1+3"><span class="thumb" style="grid-template-columns: 1.3fr 1fr; grid-template-rows: repeat(3, 1fr)" aria-hidden="true"><i style="grid-row: 1 / 4"></i><i></i><i></i><i></i></span>1 stor och 3</button><button type="button" data-preset="staplat"><span class="thumb" style="grid-template-rows: repeat(4, 1fr)" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Allt staplat</button><button type="button" data-preset="flikar"><span class="thumb" style="grid-template-columns: 1fr 1fr" aria-hidden="true"><i class="tb"></i><i class="tb"></i></span>Flikar i 2 rutor</button><button type="button" data-preset="kor"><span class="thumb" style="grid-template-columns: 1fr 1fr 1.1fr" aria-hidden="true"><i></i><i></i><i class="run"></i></span>Flöde, kod och körning</button><button type="button" data-preset="schema"><span class="thumb" style="grid-template-columns: 1fr 1fr" aria-hidden="true"><i></i><i></i></span>Schema och förklaring</button></div><h4>Vyer</h4><div class="vyer" role="group" aria-label="Vyer"><button type="button" class="viewtoggle" data-pane="flow" aria-pressed="true">Flöde</button><button type="button" class="viewtoggle" data-pane="class" aria-pressed="true">Klassdiagram</button><button type="button" class="viewtoggle" data-pane="code" aria-pressed="true">Kod</button><button type="button" class="viewtoggle" data-pane="panel" aria-pressed="true">Förklaring</button><button type="button" class="viewtoggle" data-pane="run" aria-pressed="false">Kör</button><button type="button" class="viewtoggle" data-pane="dance" aria-pressed="false">Dance</button></div><p>Eller bygg själv: dra en vy i handtaget ⠿ (eller i dess flik) och släpp den mot en kant av en annan vy, så delas platsen åt det hållet. Släpp i mitten, så hamnar vyerna som flikar på samma plats. Dra i skarvarna åt alla håll för att ändra storlek. Dance och de andra lägena har var sin layout, och valet sparas i webbläsaren.</p><button type="button" class="layreset" data-preset="aterstall">Återställ allt</button></div></details>
+  <details class="laymenu" id="laymenu"><summary>Layout ▾</summary><div class="laypop"><h4>Färdiga layouter</h4><div class="presets"><button type="button" data-preset="alla"><span class="thumb" style="grid-template-columns: repeat(4, 1fr)" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Allt sida vid sida</button><button type="button" data-preset="2x2"><span class="thumb" style="grid-template-columns: 1.3fr 1fr; grid-template-rows: 1fr 1fr" aria-hidden="true"><i></i><i></i><i></i><i></i></span>2 uppe, 2 nere</button><button type="button" data-preset="3+1"><span class="thumb" style="grid-template-columns: repeat(3, 1fr); grid-template-rows: 1.6fr 1fr" aria-hidden="true"><i></i><i></i><i></i><i style="grid-column: 1 / 4"></i></span>3 uppe, 1 nere</button><button type="button" data-preset="1+3"><span class="thumb" style="grid-template-columns: 1.3fr 1fr; grid-template-rows: repeat(3, 1fr)" aria-hidden="true"><i style="grid-row: 1 / 4"></i><i></i><i></i><i></i></span>1 stor och 3</button><button type="button" data-preset="staplat"><span class="thumb" style="grid-template-rows: repeat(4, 1fr)" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Allt staplat</button><button type="button" data-preset="flikar"><span class="thumb" style="grid-template-columns: 1fr 1fr" aria-hidden="true"><i class="tb"></i><i class="tb"></i></span>Flikar i 2 rutor</button><button type="button" data-preset="kor"><span class="thumb" style="grid-template-columns: 1fr 1fr 1.1fr" aria-hidden="true"><i></i><i></i><i class="run"></i></span>Flöde, kod och körning</button><button type="button" data-preset="schema"><span class="thumb" style="grid-template-columns: 1fr 1fr" aria-hidden="true"><i></i><i></i></span>Schema och förklaring</button></div><h4>Vyer</h4><div class="vyer" role="group" aria-label="Vyer"><button type="button" class="viewtoggle" data-pane="flow" aria-pressed="true">Flöde</button><button type="button" class="viewtoggle" data-pane="class" aria-pressed="true">Klassdiagram</button><button type="button" class="viewtoggle" data-pane="code" aria-pressed="true">Kod</button><button type="button" class="viewtoggle" data-pane="panel" aria-pressed="true">Förklaring</button><button type="button" class="viewtoggle" data-pane="run" aria-pressed="false">Kör</button><button type="button" class="viewtoggle" data-pane="dance" aria-pressed="false">Dance</button><button type="button" class="viewtoggle" data-pane="build" aria-pressed="false">Bygget</button></div><p>Eller bygg själv: dra en vy i handtaget ⠿ (eller i dess flik) och släpp den mot en kant av en annan vy, så delas platsen åt det hållet. Släpp i mitten, så hamnar vyerna som flikar på samma plats. Dra i skarvarna åt alla håll för att ändra storlek. Dance och de andra lägena har var sin layout, och valet sparas i webbläsaren.</p><button type="button" class="layreset" data-preset="aterstall">Återställ allt</button></div></details>
   <div class="textsize" role="group" aria-label="Textstorlek"><span class="extlabel">Text</span><button type="button" id="textminus" aria-label="Mindre text">A−</button><span id="textval">115 %</span><button type="button" id="textplus" aria-label="Större text">A+</button></div>
   <div class="nav">
     <button id="prev" type="button">← Föregående</button>
@@ -1182,6 +1249,22 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
       <div class="runfilebar"><b>items.txt</b><select id="runfilestate" aria-label="Hur filen items.txt är"><option value="finns">finns</option><option value="saknas">saknas</option><option value="skrivskyddad">skrivskyddad</option><option value="last">låst av ett annat program</option></select><button type="button" id="runfilereset">Återställ filen</button></div>
       <textarea id="runfiletext" spellcheck="false" aria-label="Innehållet i items.txt"></textarea>
       <p class="runhint">Filen finns bara i den här webbläsaren. Programmet läser den när det startar och skriver den vid 3. Spara. Skriv in trasiga rader, ta bort filen eller lås den och starta om, så syns felhanteringen.</p>
+    </div>
+  </div>
+  </section>
+  <section class="pane" data-pane="build" id="pane-build" aria-label="Bygget">
+  <div class="panebar"><button type="button" class="grip" data-act="drag" title="Dra vyn till en annan vy: mot en kant delar platsen, i mitten blir den en flik. Pilarna byter plats med grannen." aria-label="Flytta Bygget (dra, eller pilarna)">⠿</button><span class="panetitle">Bygget</span><span class="panectl"><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Bygget">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Bygget">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Bygget">⟲</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Bygget">×</button></span></div>
+  <div class="panebody" id="buildpane">
+    <div class="bvs">
+      <div class="bvs-top"><span class="bvs-lyric" id="bvslyric">♪</span><span class="bvs-prog" id="bvsprog"></span></div>
+      <div class="bvs-main">
+        <div class="bvs-act" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
+        <div class="bvs-side"><h5>Utforskare: Shopping</h5><div id="bvsfiles"></div><h5 class="bvs-sec">Texten → koden</h5><div class="bvs-map" id="bvsmap"></div></div>
+        <div class="bvs-ed"><div class="bvs-tabs" id="bvstabs"></div><div class="bvs-crumbs" id="bvscrumbs"></div>
+          <div class="bvs-code"><div class="bvs-lines" id="bvslines"></div><div class="bvs-mini" id="bvsmini" aria-hidden="true"></div></div></div>
+      </div>
+      <div class="bvs-term"><div class="bvs-th"><span>Problem</span><span>Utdata</span><span class="on">Terminal</span></div><pre id="bvsterm"></pre></div>
+      <div class="bvs-status" id="bvsstatus"></div>
     </div>
   </div>
   </section>
@@ -2570,8 +2653,8 @@ if (typeof module !== 'undefined') module.exports = KK2;
   // split in that direction, in the middle the view joins it as a tab. The dividers can be dragged
   // both ways, the arrow keys on a handle swap the view with its neighbour, and the Layout menu has
   // ready layouts. Dance and the other choices each keep their own layout, kept in this browser.
-  var PANES = ['flow', 'class', 'code', 'panel', 'run', 'dance'];
-  var PANE_NAMES = { flow: 'Flödesschema', 'class': 'Klassdiagram', code: 'Koden', panel: 'Förklaring', run: 'Kör programmet', dance: 'Dance' };
+  var PANES = ['flow', 'class', 'code', 'panel', 'run', 'dance', 'build'];
+  var PANE_NAMES = { flow: 'Flödesschema', 'class': 'Klassdiagram', code: 'Koden', panel: 'Förklaring', run: 'Kör programmet', dance: 'Dance', build: 'Bygget' };
   var ZOOMS = [0.5, 0.67, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3];
   // A group with one view, a split (row: side by side, col: above each other) and a group of tabs.
   function G(p) { return { t: 'g', p: [p], a: p }; }
@@ -2579,17 +2662,18 @@ if (typeof module !== 'undefined') module.exports = KK2;
     return { t: 's', d: d, c: c.map(function (x) { return typeof x === 'string' ? G(x) : x; }), w: w || c.map(function () { return 1; }) };
   }
   function T() { var ps = [].slice.call(arguments); return { t: 'g', p: ps, a: ps[0] }; }
-  // The ready layouts. In Dance the song takes the class diagram's place, and the class diagram
-  // waits as a tab behind the code.
+  // The ready layouts. In Dance the song takes the class diagram's place, and Bygget (the code
+  // being written to the song) is the first tab where the code is, with the code and the class
+  // diagram as tabs behind it.
   function presetTree(name, dance) {
     var a = dance ? ['flow', 'dance', 'code', 'panel'] : ['flow', 'class', 'code', 'panel'];
-    var third = function () { return dance ? T('code', 'class') : G('code'); };
+    var third = function () { return dance ? T('build', 'code', 'class') : G('code'); };
     if (name === 'alla') return S('row', [a[0], a[1], third(), a[3]], [32, 24, 22, 22]);
     if (name === '2x2') return S('col', [S('row', [a[0], a[1]], [1.35, 1]), S('row', [third(), a[3]])], [1.1, 1]);
     if (name === '3+1') return S('col', [S('row', [a[0], a[1], third()]), a[3]], [1.7, 1]);
     if (name === '1+3') return S('row', [a[0], S('col', [a[1], third(), a[3]])], [1.3, 1]);
     if (name === 'staplat') return S('col', [a[0], a[1], third(), a[3]]);
-    if (name === 'flikar') return S('row', [T(a[0], a[1]), dance ? T('code', 'panel', 'class') : T('code', 'panel')]);
+    if (name === 'flikar') return S('row', [T(a[0], a[1]), dance ? T('build', 'code', 'panel', 'class') : T('code', 'panel')]);
     if (name === 'kor') return S('row', ['flow', 'code', 'run'], [34, 30, 36]);
     if (name === 'schema') return S('row', ['flow', 'panel']);
     return dance ? presetTree('2x2', true) : presetTree('alla', false);
@@ -2649,6 +2733,12 @@ if (typeof module !== 'undefined') module.exports = KK2;
       if (validTree(savedL.normal)) layout.normal = savedL.normal;
       if (validTree(savedL.dance)) layout.dance = savedL.dance;
       if (savedL.zoom) PANES.forEach(function (p) { if (ZOOMS.indexOf(savedL.zoom[p]) >= 0) layout.zoom[p] = savedL.zoom[p]; });
+      // A Dance layout saved before Bygget existed gets it as the first tab where the code is (or
+      // beside everything), once.
+      if (!savedL.v && !groupOf(layout.dance, 'build')) {
+        var cg = groupOf(layout.dance, 'code');
+        if (cg) { cg.g.p.unshift('build'); cg.g.a = 'build'; } else layout.dance = S('row', [layout.dance, G('build')], [3, 1]);
+      }
     } else {
       // A layout saved by the earlier version (one row of views) becomes a row of the new tree.
       var old = JSON.parse(localStorage.getItem('kk2-vyer') || 'null');
@@ -2663,7 +2753,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
   } catch (e) {}
   layout.tree = inDanceView() ? layout.dance : layout.normal;
   function saveLayout() {
-    try { localStorage.setItem('kk2-layout', JSON.stringify({ normal: layout.normal, dance: layout.dance, zoom: layout.zoom })); } catch (e) {}
+    try { localStorage.setItem('kk2-layout', JSON.stringify({ v: 2, normal: layout.normal, dance: layout.dance, zoom: layout.zoom })); } catch (e) {}
   }
   // Each view's element, found once: while the layout is drawn a view can sit in a part that is
   // not on the page yet, where looking it up by its id would not find it.
@@ -2746,6 +2836,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
   function afterShow(p) {
     if (p === 'code') refreshCode();
     if (p === 'run') ensureRun();
+    if (p === 'build') buildTick(dAudio.currentTime);
   }
   function activate(p) {
     var r = groupOf(layout.tree, p);
@@ -3315,6 +3406,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
         danceWordChanged(i, w);
       }
     }
+    buildTick(t);
     var b = danceBeatAt(t);
     if (b !== dBeat) {
       dBeat = b;
@@ -3344,7 +3436,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
     while (lo <= hi) { var mid = (lo + hi) >> 1; if (DB[mid] <= t) { found = mid; lo = mid + 1; } else hi = mid - 1; }
     return found;
   }
-  var BOP = '.node.multi, .node.sel, .cdm.sel, .cdm.rel, .cdc.sel, #codepane tr.blk, #panel .dexp';
+  var BOP = '.node.multi, .node.sel, .cdm.sel, .cdm.rel, .cdc.sel, #codepane tr.blk, #panel .dexp, #buildpane .bln.cur';
   function danceStill() {
     document.querySelectorAll('.bop, .bop-down').forEach(function (e) { e.classList.remove('bop', 'bop-down'); });
     var line = lyricsEl.querySelector('.lyline.now');
@@ -3602,11 +3694,299 @@ if (typeof module !== 'undefined') module.exports = KK2;
     }
   }
 
+  // Asked for: a view that codes and builds the whole program in an imitation of VS Code, mapped to
+  // the lyrics. While the song plays, the code of all four files is typed. The lines a lyric line is
+  // about are typed while it is sung (at most ten lines for each target, the first time a line comes
+  // up), and the other lines are typed in the pauses between, in reading order, so that the whole
+  // program is written when the last line has been sung. Then the build succeeds (as the real
+  // "dotnet build" of this code does: 0 warnings, 0 errors) and "dotnet run" starts the program: the
+  // JavaScript copy, with items.txt as it was handed out, where the user chooses 5 (Avsluta).
+  // Everything follows the time in the song, so jumping in the song shows the code as it is then.
+  var BFILES = DATA.codeFiles.slice(), BTEXT = {}, BHL = {}, BLF = {}, BL = [], BEV = [], BCAP = 10;
+  BFILES.forEach(function (f) {
+    var lines = DATA.code.now.files[f].replace(/\r/g, '').split('\n');
+    if (lines.length > 1 && lines[lines.length - 1] === '') lines.pop();
+    BTEXT[f] = lines;
+    BHL[f] = highlightLines(lines.join('\n'));
+    BLF[f] = lines.map(function (text, k) {
+      var o = { f: f, n: k + 1, text: text, len: text.trim() ? text.length : 0, t0: 0, t1: 0, ev: -1 };
+      BL.push(o);
+      return o;
+    });
+  });
+  // The lyric targets in time order, each with the code lines it is about.
+  function bWordTime(L, w) {
+    for (var k = Math.min(w, L.words.length - 1); k >= 0; k--) if (L.words[k] !== null && L.words[k] !== undefined) return L.words[k];
+    return L.start;
+  }
+  DL.forEach(function (L, i) {
+    if (L.start === null || L.start === undefined) return;
+    (L.targets || []).forEach(function (tg) { BEV.push({ t: bWordTime(L, tg[0]), i: i, spec: tg[1], lines: [] }); });
+  });
+  BEV.sort(function (a, b) { return a.t - b.t; });
+  function bRanges(spec) {
+    if (spec.m && CD[spec.m] && CD[spec.m].now) return [[CD[spec.m].file, CD[spec.m].now.from, CD[spec.m].now.to]];
+    if (spec.l) return [[spec.l[0], spec.l[1], spec.l[1]]];
+    if (spec.c && CLS[spec.c]) {
+      var c = CLS[spec.c], lines = BTEXT[c.file] || [];
+      for (var j = 0; j < lines.length; j++) {
+        var mt = /\bclass\s+(\w+)/.exec(lines[j]);
+        if (mt && mt[1] === spec.c) return [[c.file, j + 1, j + 3]];
+      }
+      // Program.cs has no class line: its first part stands for it.
+      var ms = DATA.members.filter(function (x) { return x.cls === spec.c && x.now; }).sort(function (a, b) { return a.now.from - b.now.from; });
+      return ms.length ? [[ms[0].file, ms[0].now.from, ms[0].now.to]] : [];
+    }
+    if (spec.b) {
+      var b = DATA.bugs.concat(DATA.exts).filter(function (x) { return String(x.key) === String(spec.b); })[0], out = [];
+      if (b) (b.boxes.length ? b.boxes : [b.id]).forEach(function (id) {
+        var L = DATA.nodes[id].lines.now;
+        Object.keys(L).forEach(function (f) { L[f].forEach(function (r) { out.push([f, r[0], r[1]]); }); });
+      });
+      return out;
+    }
+    return [];
+  }
+  // Each line is typed by the first target that is about it; a target types its lines while it is
+  // sung, at most 2.2 seconds and never past the next target.
+  BEV.forEach(function (e, k) {
+    var got = 0, seen = 0;
+    e.show = [];
+    bRanges(e.spec).forEach(function (r) {
+      for (var n = r[1]; n <= r[2]; n++) {
+        var o = (BLF[r[0]] || [])[n - 1];
+        if (!o) continue;
+        if (seen < BCAP) { e.show.push(o); if (o.len) seen++; }
+        if (o.ev >= 0 || got >= BCAP) continue;
+        o.ev = k;
+        e.lines.push(o);
+        if (o.len) got++;
+      }
+    });
+    var next = k + 1 < BEV.length ? BEV[k + 1].t : e.t + 2.2, chars = 0, at = e.t;
+    e.d = Math.max(0.35, Math.min(2.2, next - e.t));
+    e.lines.forEach(function (o) { chars += o.len; });
+    e.lines.forEach(function (o) { o.t0 = at; at += chars ? e.d * o.len / chars : 0; o.t1 = at; });
+  });
+  // The other lines are typed in the time between, in reading order, all done by the end.
+  var bLastWord = 0;
+  DL.forEach(function (L) { if (L.start !== null && L.start !== undefined) bLastWord = Math.max(bLastWord, bWordTime(L, L.words.length - 1)); });
+  var B_START = 1.5, B_END = bLastWord + 1, bFree = [], bCur = B_START;
+  BEV.filter(function (e) { return e.lines.length; }).map(function (e) { return [e.t, e.t + e.d]; })
+    .sort(function (a, b) { return a[0] - b[0]; })
+    .forEach(function (w) { if (w[0] > bCur) bFree.push([bCur, Math.min(w[0], B_END)]); bCur = Math.max(bCur, w[1]); });
+  if (bCur < B_END) bFree.push([bCur, B_END]);
+  bFree = bFree.filter(function (w) { return w[1] - w[0] > 0.05; });
+  (function () {
+    var bg = BL.filter(function (o) { return o.ev < 0; }), chars = 0, time = 0;
+    bg.forEach(function (o) { chars += o.len; });
+    bFree.forEach(function (w) { time += w[1] - w[0]; });
+    // A line is typed inside one pause, so some time is left over: the pace goes up until it fits.
+    for (var rate = chars / Math.max(time, 1), tries = 0; tries < 40; tries++, rate *= 1.05) {
+      var wi = 0, t = bFree.length ? bFree[0][0] : B_START, ok = true;
+      for (var j = 0; j < bg.length && ok; j++) {
+        var o = bg[j], need = o.len / rate;
+        while (wi < bFree.length && t + need > bFree[wi][1] + 1e-6) { wi++; if (wi < bFree.length) t = Math.max(t, bFree[wi][0]); }
+        if (wi >= bFree.length) { ok = false; break; }
+        o.t0 = t;
+        o.t1 = t + need;
+        t = o.t1;
+      }
+      if (ok) break;
+    }
+  })();
+  var B_DONE = 0;
+  BL.forEach(function (o) { B_DONE = Math.max(B_DONE, o.t1); });
+  B_DONE = Math.max(B_DONE + 0.6, bLastWord + 0.3);
+  var BLT = BL.filter(function (o) { return o.len; }).sort(function (a, b) { return a.t0 - b.t0 || a.t1 - b.t1; });
+  var BTOTAL = 0, BFTOTAL = {};
+  BL.forEach(function (o) { BTOTAL += o.len; BFTOTAL[o.f] = (BFTOTAL[o.f] || 0) + o.len; });
+
+  // The program's run at the end: the JavaScript copy with items.txt as handed out, choosing 5.
+  var bRunOut = '';
+  (function () {
+    var inputs = ['5'];
+    KK2.run({
+      write: function (s) { bRunOut += s; },
+      readLine: function () { var v = inputs.length ? inputs.shift() : null; if (v !== null) bRunOut += v + '\n'; return Promise.resolve(v); },
+      at: function () { return Promise.resolve(); },
+      file: { exists: function () { return true; }, read: function () { return DATA.runItems; }, openWrite: function () {}, write: function () {} }
+    }).then(null, function (e) { bRunOut += '\n[' + e.message + ']\n'; });
+  })();
+
+  var bEl = function (id) { return document.getElementById(id); }, bLast = {};
+  // The parts around the code are written again only when their text changes.
+  function bSet(id, html) { if (bLast[id] !== html) { bLast[id] = html; bEl(id).innerHTML = html; } }
+  var bLinesEl = bEl('bvslines'), bMini = document.createElement('canvas'), bLens = document.createElement('div');
+  bEl('bvsmini').appendChild(bMini);
+  bLens.className = 'blens';
+  var bShown = null, bLineEls = [], bLineKey = [], bCurEl = null, bLastActive = null, bMiniKey = '';
+  function bTyped(o, t) { return t >= o.t1 ? o.len : t <= o.t0 ? 0 : Math.floor(o.len * (t - o.t0) / (o.t1 - o.t0)); }
+  function bState(o, t) {
+    if (t >= o.t1) return t - o.t1 < 1.2 && o.len ? 'f' : 'd';
+    if (t >= o.t0) return 'p' + bTyped(o, t);
+    return 't';
+  }
+  // The line being typed at time t, or the last one typed.
+  function bActiveAt(t) {
+    var lo = 0, hi = BLT.length - 1, found = -1;
+    while (lo <= hi) { var mid = (lo + hi) >> 1; if (BLT[mid].t0 <= t) { found = mid; lo = mid + 1; } else hi = mid - 1; }
+    return found >= 0 ? BLT[found] : null;
+  }
+  // The target sung at time t (its index), while its time lasts.
+  function bEventAt(t) {
+    var lo = 0, hi = BEV.length - 1, k = -1;
+    while (lo <= hi) { var mid = (lo + hi) >> 1; if (BEV[mid].t <= t) { k = mid; lo = mid + 1; } else hi = mid - 1; }
+    return k >= 0 && t < BEV[k].t + BEV[k].d ? k : -1;
+  }
+  function bShowFile(f) {
+    bShown = f;
+    var h = '';
+    BLF[f].forEach(function (o) { h += '<div class="bln todo"><span class="n">' + o.n + '</span><span class="c"></span></div>'; });
+    bLinesEl.innerHTML = h;
+    bLineEls = Array.prototype.slice.call(bLinesEl.children);
+    bLineKey = bLineEls.map(function () { return ''; });
+    bCurEl = null;
+    bMiniKey = '';
+  }
+  function bClock(s) { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ':' + ('0' + s % 60).slice(-2); }
+  function bSection(t) { var s = ''; DL.forEach(function (L) { if (L.start !== null && L.start !== undefined && L.start <= t) s = L.section; }); return s; }
+  function bWhere(o) {
+    var m = DATA.members.filter(function (x) { return x.file === o.f && x.now && x.now.from <= o.n && o.n <= x.now.to; })[0];
+    if (!m) return [o.f];
+    var h = m.head.indexOf(': ') >= 0 ? [m.head.slice(m.head.indexOf(': ') + 2)] : m.head.split('.');
+    return [o.f].concat(h);
+  }
+  function bDrawMini(t, f) {
+    var box = bMini.parentNode, w = box.clientWidth, h = box.clientHeight;
+    if (!w || !h) return;
+    var lines = BLF[f], lh = Math.min(3, h / Math.max(lines.length, 1)), top = bLinesEl.scrollTop / Math.max(bLinesEl.scrollHeight, 1);
+    var key = f + '|' + w + 'x' + h + '|' + Math.round(top * 200) + '|' + lines.map(function (o) { return bState(o, t).charAt(0); }).join('');
+    if (key === bMiniKey) return;
+    bMiniKey = key;
+    if (bMini.width !== w || bMini.height !== h) { bMini.width = w; bMini.height = h; }
+    var g = bMini.getContext('2d');
+    g.clearRect(0, 0, w, h);
+    g.fillStyle = 'rgba(255,255,255,.07)';
+    g.fillRect(0, top * lines.length * lh, w, bLinesEl.clientHeight / Math.max(bLinesEl.scrollHeight, 1) * lines.length * lh);
+    lines.forEach(function (o, k) {
+      if (!o.len) return;
+      var ind = o.text.length - o.text.replace(/^\s+/, '').length, s = bState(o, t).charAt(0);
+      g.fillStyle = s === 't' ? '#3a3d41' : s === 'd' ? '#6b7079' : '#62f3ff';
+      g.fillRect(4 + ind * 0.7, k * lh, Math.max(2, Math.min(w - 8 - ind * 0.7, (o.len - ind) * 0.55)), Math.max(1, lh - 1));
+    });
+  }
+  function bTerm(t, pct, act) {
+    var BS = String.fromCharCode(92), P = '<span class="dim">PS C:' + BS + 'farm' + BS + 'Shopping&gt;</span> ', h;
+    if (t < B_START) return P + 'code .\n<span class="dim">Väntar på låten …</span>';
+    if (t < B_DONE) {
+      return P + 'code .\n  Skriver ' + esc(act ? act.f : '') + ' … <span class="y">' + pct + ' %</span> av programmet\n  <span class="dim">' +
+        BFILES.map(function (f) {
+          var done = 0;
+          BLF[f].forEach(function (o) { done += bTyped(o, t); });
+          return f + ' ' + (done >= BFTOTAL[f] ? '✓' : done ? '●' : '○');
+        }).join('  ') + '</span>';
+    }
+    var s = t - B_DONE;
+    h = P + 'code .\n  Hela programmet är skrivet.\n' + P + 'dotnet build\n';
+    if (s > 0.4) h += '  Restored C:' + BS + 'farm' + BS + 'Shopping' + BS + 'Shopping.csproj.\n';
+    if (s > 1) h += '  Shopping -&gt; C:' + BS + 'farm' + BS + 'Shopping' + BS + 'bin' + BS + 'Debug' + BS + 'net10.0' + BS + 'Shopping.dll\n';
+    if (s > 1.6) h += '\n<span class="ok">Build succeeded.</span>\n    0 Warning(s)\n    0 Error(s)\n';
+    if (s > 2.6) h += '\n' + P + 'dotnet run\n';
+    if (s > 3.2) {
+      var out = bRunOut.split('\n');
+      var shown = Math.min(out.length, Math.floor((s - 3.2) / 0.08) + 1);
+      h += esc(out.slice(0, shown).join('\n'));
+      if (shown >= out.length) h += (/\n$/.test(bRunOut) ? '' : '\n') + P + '<span class="bcaret"></span>';
+    }
+    return h;
+  }
+  function buildTick(t) {
+    if (!bLinesEl || !paneOn('build')) return;
+    // What the editor shows: the code the line being sung is about, or else the line being typed in
+    // a pause. Code a line is about that was written earlier is shown again, yellow (the page's
+    // colour for the focus in the code), with the time it was written; the typing goes on meanwhile.
+    var act = bActiveAt(t), dk = bEventAt(t), de = dk >= 0 ? BEV[dk] : null, typing = !!(act && t < act.t1);
+    var show = de && de.show.length && !(typing && act.ev === dk) ? de.show : null;
+    var cur = show ? show[0] : act, f = cur ? cur.f : BFILES[0];
+    if (f !== bShown) bShowFile(f);
+    var hit = {};
+    if (show) show.forEach(function (o) { if (o.f === f) hit[o.n] = true; });
+    var lines = BLF[f];
+    for (var k = 0; k < lines.length; k++) {
+      var o = lines[k], st = bState(o, t), key = st + (hit[o.n] ? 'h' : '');
+      if (key === bLineKey[k]) continue;
+      bLineKey[k] = key;
+      var el = bLineEls[k], c = el.lastChild, p = st.charAt(0) === 'p';
+      el.classList.toggle('todo', st === 't');
+      el.classList.toggle('fresh', st === 'f' || p);
+      el.classList.toggle('hit', !!hit[o.n]);
+      c.innerHTML = p ? (highlightLines(o.text.slice(0, bTyped(o, t)))[0] || '') + '<span class="bcaret"></span>' : (BHL[f][k] || '');
+    }
+    // The line in focus, its lyric above it as a CodeLens, and the view scrolled to it.
+    var curEl = cur && cur.f === f ? bLineEls[cur.n - 1] : null;
+    if (curEl !== bCurEl) {
+      if (bCurEl) bCurEl.classList.remove('cur');
+      if (curEl) curEl.classList.add('cur');
+      bCurEl = curEl;
+    }
+    var lensEv = show || (typing && act.ev >= 0 && act.ev === dk) ? de : null;
+    if (lensEv && curEl) {
+      var when = !show ? 'skrivs nu' : cur.ev === dk ? 'skrevs nyss' : t >= cur.t1 ? 'skrevs ' + bClock(cur.t0) : 'skrivs senare';
+      bLens.textContent = '♪ “' + DL[lensEv.i].text + '” · ' + when;
+      if (bLens.nextSibling !== curEl) bLinesEl.insertBefore(bLens, curEl);
+    } else if (bLens.parentNode) bLens.parentNode.removeChild(bLens);
+    if (cur !== bLastActive && curEl) {
+      bLastActive = cur;
+      var want = curEl.offsetTop - bLinesEl.clientHeight / 3;
+      if (Math.abs(bLinesEl.scrollTop - want) > bLinesEl.clientHeight / 4) bLinesEl.scrollTop = want;
+    }
+    // Explorer, tabs, breadcrumbs, the lyric map, the top bar, the terminal and the status bar.
+    var typedAll = 0, fileDone = {}, fileStart = {};
+    BL.forEach(function (o) {
+      var n = bTyped(o, t);
+      typedAll += n;
+      fileDone[o.f] = (fileDone[o.f] || 0) + n;
+      if (o.len && (fileStart[o.f] === undefined || o.t0 < fileStart[o.f])) fileStart[o.f] = o.t0;
+    });
+    var pct = Math.min(100, Math.round(100 * typedAll / BTOTAL));
+    var h = '';
+    BFILES.forEach(function (x) {
+      var done = fileDone[x] >= BFTOTAL[x], on = typing && act.f === x && !done, frac = BFTOTAL[x] ? fileDone[x] / BFTOTAL[x] : 1;
+      h += '<div class="bvs-file' + (x === f ? ' on' : '') + '"><span class="ic">C#</span><span class="nm">' + esc(x) + '</span><span class="st' + (done ? ' ok">✓' : on ? ' w">● skrivs' :
+        fileDone[x] ? '">' + Math.floor(frac * 100) + ' %' : '">' + esc(bSection(fileStart[x])) ) + '</span></div><div class="bvs-bar"><i style="width: ' + (frac * 100).toFixed(1) + '%"></i></div>';
+    });
+    h += '<div class="bvs-file"><span class="ic txt">{}</span>items.txt<span class="st">läses vid körning</span></div>';
+    bSet('bvsfiles', h);
+    bSet('bvstabs', BFILES.filter(function (x) { return fileStart[x] <= t || x === f; }).map(function (x) {
+      return '<span' + (x === f ? ' class="on"' : '') + '>' + esc(x) + (fileDone[x] < BFTOTAL[x] ? ' ●' : '') + '</span>';
+    }).join(''));
+    bSet('bvscrumbs', esc(cur ? bWhere(cur).join(' › ') : f));
+    var recent = BEV.filter(function (e) { return e.t <= t && e.show.length; }).slice(-4);
+    bSet('bvsmap', recent.map(function (e) {
+      var fs = e.show.filter(function (o) { return o.len; }), first = fs[0] || e.show[0], last = fs.length ? fs[fs.length - 1] : first;
+      var text = DL[e.i].text, cut = text.length > 30 ? text.slice(0, 29) + '…' : text;
+      return '<div' + (e === de ? ' class="on"' : '') + '>' + esc(cut) + ' → <b>' + (first.f === f ? 'rad ' : esc(first.f) + ' ') + first.n +
+        (last.f === first.f && last.n > first.n ? '–' + last.n : '') + '</b></div>';
+    }).join(''));
+    var di = danceEventAt(t), dur = dAudio.duration || DB[DB.length - 1] || 0;
+    bSet('bvslyric', esc('♪ ' + (di >= 0 ? DL[DEV[di].i].text : 'The Farm Called C-Sharp')));
+    bSet('bvsprog', bClock(t) + ' / ' + bClock(dur) + ' · ' + (t >= B_DONE ? 'BYGGT OCH KÖRT' : pct + ' % AV PROGRAMMET SKRIVET'));
+    var th = bTerm(t, pct, act);
+    if (bLast.bvsterm !== th) { bSet('bvsterm', th); bEl('bvsterm').scrollTop = bEl('bvsterm').scrollHeight; }
+    var b = danceBeatAt(t), pos = b >= 0 ? DPOS[b] : -1;
+    bSet('bvsstatus', '<span>⎇ main</span><span>♪ ' + (b >= 0 ? hudBpmAt[b] : DATA.dance.bpm).toFixed(1) + ' BPM · slag ' + (pos >= 0 ? pos + 1 : '–') + ' av 4</span>' +
+      '<span class="r"><span>Rad ' + (cur ? cur.n : 1) + ', Kol ' + ((cur ? bTyped(cur, t) : 0) + 1) + '</span><span>UTF-8</span><span>C#</span></span>');
+    bDrawMini(t, f);
+  }
+  bLinesEl.addEventListener('scroll', function () { bDrawMini(dAudio.currentTime, bShown || BFILES[0]); });
+
   applyLayout();
   applyText();
   refreshCode();
   if (inLayout('run')) ensureRun();
   danceViewChanged(document.body.classList.contains('view-dance'));
+  buildTick(dAudio.currentTime);
   hudRun();
   if (document.body.classList.contains('view-dance')) dancePlay();
 
