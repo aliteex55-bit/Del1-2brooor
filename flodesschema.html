@@ -373,6 +373,8 @@ body.docking, body.docking * { cursor: grabbing !important; user-select: none; }
 @keyframes paneflash { from { box-shadow: inset 0 0 0 3px var(--accent); } to { box-shadow: inset 0 0 0 0 transparent; } }
 .pane.flash { animation: paneflash 1s ease-out; }
 .cdhint { color: var(--muted); font-size: 13px; margin: 0 0 8px; }
+#cdsvg:not(.tall) .cdln-tall, #cdsvg.tall .cdln-wide { display: none; }
+body.view-dance #cdtitle { display: none; }
 #arr2 path { fill: var(--muted); }
 #classbody .lbl { font-size: 13px; }
 .cdbox { fill: var(--bg); stroke: var(--muted); stroke-width: 1.5; }
@@ -930,9 +932,10 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
   <div class="panebar"><button type="button" class="grip" data-act="drag" title="Dra vyn till en annan vy: mot en kant delar platsen, i mitten blir den en flik. Pilarna byter plats med grannen." aria-label="Flytta Klassdiagram (dra, eller pilarna)">⠿</button><span class="panetitle">Klassdiagram</span><span class="panectl"><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Klassdiagram">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Klassdiagram">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Klassdiagram">⟲</button><button type="button" data-act="full" title="Vyn i helskärm (Esc avslutar)" aria-label="Klassdiagram i helskärm">⛶</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Klassdiagram">×</button></span></div>
   <div class="panebody" id="classbody">
     <p class="cdhint" id="cdtitle">Klicka på en klass eller en del av den. Problem visar startkoden, Lösning koden nu. Etiketterna är lagren som ändrade delen.</p>
-    <svg id="cdsvg" viewBox="0 0 1143 798" role="group" aria-label="Klassdiagram över programmet">
+    <svg id="cdsvg" viewBox="0 0 1143 798" data-wide="0 0 1143 798" data-tall="0 0 784 1110" role="group" aria-label="Klassdiagram över programmet">
       <defs><marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z"/></marker></defs>
 <g class="cd cd-start">
+<g class="cdk" data-k="Program" data-tx="46" data-ty="0">
 <rect class="cdbox" x="12" y="16" width="327" height="252" rx="5"/>
 <g class="cdc" data-c="Program" tabindex="0" role="button" aria-label="Klassen Program">
 <path d="M12 66 V21 Q12 16 17 16 H334 Q339 16 339 21 V66 Z"/>
@@ -983,6 +986,8 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
 <rect class="bg" x="15" y="239" width="321" height="22" rx="3"/>
 <text class="sig" x="24" y="255">val 5: avsluta</text>
 </g>
+</g>
+<g class="cdk" data-k="ShoppingList" data-tx="-411" data-ty="322">
 <rect class="cdbox" x="469" y="16" width="557" height="292" rx="5"/>
 <g class="cdc" data-c="ShoppingList" tabindex="0" role="button" aria-label="Klassen ShoppingList">
 <path d="M469 50 V21 Q469 16 474 16 H1021 Q1026 16 1026 21 V50 Z"/>
@@ -1054,6 +1059,8 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
 <g class="badge"><rect x="592.0" y="281.5" width="31.6" height="17" rx="8.5"/><text x="607.8" y="294" text-anchor="middle">1-2</text></g>
 <g class="badge"><rect x="557.4" y="281.5" width="31.6" height="17" rx="8.5"/><text x="573.2" y="294" text-anchor="middle">1-1</text></g>
 </g>
+</g>
+<g class="cdk" data-k="Item" data-tx="-411" data-ty="322">
 <rect class="cdbox" x="469" y="450" width="360" height="148" rx="5"/>
 <g class="cdc" data-c="Item" tabindex="0" role="button" aria-label="Klassen Item">
 <path d="M469 484 V455 Q469 450 474 450 H824 Q829 450 829 455 V484 Z"/>
@@ -1078,6 +1085,8 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
 <rect class="bg" x="472" y="569" width="354" height="22" rx="3"/>
 <text class="sig" x="481" y="585">+ToString() : string</text>
 </g>
+</g>
+<g class="cdln-wide">
 <path class="ln" d="M339 33 H467" fill="none" marker-end="url(#arr2)"/>
 <text class="lbl" x="404.0" y="53" text-anchor="middle">skapar och</text>
 <text class="lbl" x="404.0" y="68" text-anchor="middle">använder</text>
@@ -1089,7 +1098,20 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
 <text class="lbl" x="523" y="391.0">items</text>
 <text class="lbl" x="523" y="444">0..*</text>
 </g>
+<g class="cdln-tall">
+<path class="ln" d="M118 268 V336" fill="none" marker-end="url(#arr2)"/>
+<text class="lbl" x="128" y="307.0">skapar och använder</text>
+<path class="ln cddash" d="M58 33 H35 V789 H56" fill="none" marker-end="url(#arr2)"/>
+<text class="lbl" x="29" y="411.0" text-anchor="middle" transform="rotate(-90 29 411.0)">skapar med new Item</text>
+<polygon class="cddia" points="102,630 108,638 102,646 96,638"/>
+<path class="ln" d="M102 646 V772" fill="none"/>
+<text class="lbl" x="112" y="644">1</text>
+<text class="lbl" x="112" y="713.0">items</text>
+<text class="lbl" x="112" y="766">0..*</text>
+</g>
+</g>
 <g class="cd cd-now">
+<g class="cdk" data-k="Program" data-tx="46" data-ty="0">
 <rect class="cdbox" x="12" y="16" width="327" height="252" rx="5"/>
 <g class="cdc" data-c="Program" tabindex="0" role="button" aria-label="Klassen Program">
 <path d="M12 66 V21 Q12 16 17 16 H334 Q339 16 339 21 V66 Z"/>
@@ -1141,6 +1163,8 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
 <rect class="bg" x="15" y="239" width="321" height="22" rx="3"/>
 <text class="sig" x="24" y="255">val 5: avsluta</text>
 </g>
+</g>
+<g class="cdk" data-k="ShoppingList" data-tx="-411" data-ty="322">
 <rect class="cdbox" x="469" y="16" width="557" height="364" rx="5"/>
 <g class="cdc" data-c="ShoppingList" tabindex="0" role="button" aria-label="Klassen ShoppingList">
 <path d="M469 50 V21 Q469 16 474 16 H1021 Q1026 16 1026 21 V50 Z"/>
@@ -1233,6 +1257,8 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
 <text class="sig" x="481" y="367">-ParseBudget(string line) : int</text>
 <g class="okbadge"><rect x="981.2" y="353.5" width="38.8" height="17" rx="8.5"/><text x="1000.6" y="366" text-anchor="middle">U4-2</text></g>
 </g>
+</g>
+<g class="cdk" data-k="Item" data-tx="-411" data-ty="322">
 <rect class="cdbox" x="469" y="450" width="360" height="148" rx="5"/>
 <g class="cdc" data-c="Item" tabindex="0" role="button" aria-label="Klassen Item">
 <path d="M469 484 V455 Q469 450 474 450 H824 Q829 450 829 455 V484 Z"/>
@@ -1258,6 +1284,8 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
 <rect class="bg" x="472" y="569" width="354" height="22" rx="3"/>
 <text class="sig" x="481" y="585">+ToString() : string</text>
 </g>
+</g>
+<g class="cdk" data-k="InvalidLineException" data-tx="-411" data-ty="312">
 <rect class="cdbox" x="469" y="658" width="662" height="124" rx="5"/>
 <g class="cdc" data-c="InvalidLineException" tabindex="0" role="button" aria-label="Klassen InvalidLineException">
 <path d="M469 692 V663 Q469 658 474 658 H1126 Q1131 658 1131 663 V692 Z"/>
@@ -1282,6 +1310,8 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
 <text class="sig" x="481" y="769">+InvalidLineException(int lineNumber, string message, Exception inner)</text>
 <g class="okbadge"><rect x="1086.2" y="755.5" width="38.8" height="17" rx="8.5"/><text x="1105.6" y="768" text-anchor="middle">U3-2</text></g>
 </g>
+</g>
+<g class="cdln-wide">
 <path class="ln" d="M339 33 H467" fill="none" marker-end="url(#arr2)"/>
 <text class="lbl" x="404.0" y="53" text-anchor="middle">skapar och</text>
 <text class="lbl" x="404.0" y="68" text-anchor="middle">använder</text>
@@ -1295,6 +1325,20 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
 <path class="ln cddash" d="M469 366 H439 V675 H467" fill="none" marker-end="url(#arr2)"/>
 <text class="lbl" x="433" y="671" text-anchor="end">kastar och</text>
 <text class="lbl" x="433" y="686" text-anchor="end">fångar</text>
+</g>
+<g class="cdln-tall">
+<path class="ln" d="M118 268 V336" fill="none" marker-end="url(#arr2)"/>
+<text class="lbl" x="128" y="307.0">skapar och använder</text>
+<path class="ln cddash" d="M58 33 H35 V789 H56" fill="none" marker-end="url(#arr2)"/>
+<text class="lbl" x="29" y="411.0" text-anchor="middle" transform="rotate(-90 29 411.0)">skapar med new Item</text>
+<polygon class="cddia" points="102,702 108,710 102,718 96,710"/>
+<path class="ln" d="M102 718 V772" fill="none"/>
+<text class="lbl" x="112" y="716">1</text>
+<text class="lbl" x="112" y="749.0">items</text>
+<text class="lbl" x="112" y="766">0..*</text>
+<path class="ln cddash" d="M615 688 H754 V987 H722" fill="none" marker-end="url(#arr2)"/>
+<text class="lbl" x="770" y="837.5" text-anchor="middle" transform="rotate(-90 770 837.5)">kastar och fångar</text>
+</g>
 </g>
     </svg>
   </div>
@@ -2829,7 +2873,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
 
   // Asked for: "same zoom as picture". The zoom of each view in the starting layout, as in the
   // user's picture (the drawings at 100 % show the whole drawing).
-  var START_ZOOM = { flow: 1, 'class': 1, code: 0.67, panel: 0.5, run: 0.5, dance: 0.8, build: 0.5 };
+  var START_ZOOM = { flow: 1, 'class': 1, code: 0.67, panel: 1, run: 0.5, dance: 0.8, build: 0.5 };
   var layout = { tree: null, normal: presetTree('alla', false), dance: presetTree('start', true), zoom: {} };
   PANES.forEach(function (p) { layout.zoom[p] = START_ZOOM[p] || 1; });
   try {
@@ -2840,6 +2884,8 @@ if (typeof module !== 'undefined') module.exports = KK2;
       if (savedL.zoom) PANES.forEach(function (p) { if (ZOOMS.indexOf(savedL.zoom[p]) >= 0) layout.zoom[p] = savedL.zoom[p]; });
       // Once (v8): the drawings start at 100 %, which now shows the whole drawing.
       if (!(savedL.v >= 8)) { layout.zoom.flow = 1; layout.zoom['class'] = 1; }
+      // Once (v13): the explanation starts at 100 %, which in Dance now fills its view.
+      if (!(savedL.v >= 13)) layout.zoom.panel = 1;
       // A Dance layout saved before Bygget existed gets it as the first tab where the code is (or
       // beside everything), once.
       if (!savedL.v && !groupOf(layout.dance, 'build')) {
@@ -2870,7 +2916,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
   } catch (e) {}
   layout.tree = inDanceView() ? layout.dance : layout.normal;
   function saveLayout() {
-    try { localStorage.setItem('kk2-layout', JSON.stringify({ v: 12, normal: layout.normal, dance: layout.dance, zoom: layout.zoom })); } catch (e) {}
+    try { localStorage.setItem('kk2-layout', JSON.stringify({ v: 13, normal: layout.normal, dance: layout.dance, zoom: layout.zoom })); } catch (e) {}
   }
   // Each view's element, found once: while the layout is drawn a view can sit in a part that is
   // not on the page yet, where looking it up by its id would not find it.
@@ -3139,6 +3185,36 @@ if (typeof module !== 'undefined') module.exports = KK2;
     if (!vb || !vb.width || !vb.height || w <= 0 || h <= 40) return 1;
     return Math.min(1, h * vb.width / vb.height / w);
   }
+  // The class diagram: the arrangement (side by side, or under each other) that shows the classes
+  // biggest in the view.
+  function cdArrange(body, top) {
+    var svg = document.getElementById('cdsvg'), cs = getComputedStyle(body);
+    if (!svg || !svg.getAttribute('data-tall')) return;
+    var w = body.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), h = body.clientHeight - top - parseFloat(cs.paddingBottom) - 6;
+    if (w <= 0 || h <= 40) return;
+    var fit = function (vb) { var q = vb.split(' ').map(Number); return Math.min(w / q[2], h / q[3]); };
+    var tall = fit(svg.getAttribute('data-tall')) > fit(svg.getAttribute('data-wide')) * 1.05;
+    if (svg.classList.contains('tall') === tall) return;
+    svg.classList.toggle('tall', tall);
+    svg.setAttribute('viewBox', svg.getAttribute(tall ? 'data-tall' : 'data-wide'));
+    svg.querySelectorAll('.cdk').forEach(function (g) {
+      if (tall) g.setAttribute('transform', 'translate(' + g.getAttribute('data-tx') + ' ' + g.getAttribute('data-ty') + ')');
+      else g.removeAttribute('transform');
+    });
+  }
+  // Asked for: the explanation card in Dance fills its view (its text was small with free space
+  // around it): the largest zoom at which the whole card fits. The view's own zoom (−, +) is on top
+  // of that, 100 % meaning "fills the view".
+  function cardFit(body) {
+    if (!body.clientHeight) return textScale;
+    var lo = 0.4, hi = 3.2;
+    for (var k = 0; k < 10; k++) {
+      var mid = (lo + hi) / 2;
+      body.style.zoom = mid;
+      if (body.scrollHeight <= body.clientHeight + 1) lo = mid; else hi = mid;
+    }
+    return lo;
+  }
   function applyZoom(p) {
     var el = paneEl(p), own = layout.zoom[p] || 1, z = own * textScale, body = el.querySelector('.panebody');
     el.querySelector('.zoomval').textContent = Math.round(own * 100) + ' %';
@@ -3149,9 +3225,12 @@ if (typeof module !== 'undefined') module.exports = KK2;
       var shown = svgs.filter(function (c) { return c.getClientRects().length; })[0];
       // Where the drawing starts in the view (under the help text of the class diagram).
       var top = shown ? shown.getBoundingClientRect().top - body.getBoundingClientRect().top + body.scrollTop : 0;
+      if (p === 'class') cdArrange(body, top);
       svgs.forEach(function (c) { c.style.width = (drawFit(body, c, top) * own * 100) + '%'; });
       body.scrollLeft = cx * body.scrollWidth - body.clientWidth / 2;
       body.scrollTop = cy * body.scrollHeight - body.clientHeight / 2;
+    } else if (p === 'panel' && body.querySelector('.dexp')) {
+      body.style.zoom = cardFit(body) * own;
     } else {
       body.style.zoom = z;
     }
@@ -3335,7 +3414,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
     };
   }
   // The flow chart and the class diagram fit their views again (after a divider or the window moved).
-  function fitDrawings() { ['flow', 'class'].forEach(function (p) { if (paneOn(p)) applyZoom(p); }); }
+  function fitDrawings() { ['flow', 'class', 'panel'].forEach(function (p) { if (paneOn(p) && (p !== 'panel' || panel.querySelector('.dexp'))) applyZoom(p); }); }
   addEventListener('resize', fitDrawings);
   addEventListener('load', fitDrawings);
   // The arrow keys move a divider by 5 % of the room of its two parts (dir -1 or 1).
@@ -4005,6 +4084,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
       '<p class="dline">' + (line ? line.innerHTML : esc(DL[i].text)) + '</p>' +
       (body || '<p class="what">Den här raden lyser inte upp någon del av koden. Nästa rad som gör det förklaras här.</p>') + '</div>';
     panel.scrollTop = 0;
+    applyZoom('panel');
   }
   function danceCardWords(i, w) {
     var c = panel.querySelector('.dexp[data-line="' + i + '"] .dline');
@@ -4019,6 +4099,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
     panel.innerHTML = '<div class="dexp"><div class="dnow"><span class="dnowtag">♪ Dance</span></div><h2>The Farm Called C-Sharp</h2>' +
       '<p class="what">Förklaringen följer låten. Raden som sjungs står här överst, och under den förklaras det som raden lyser upp ' +
       'i flödet, klassdiagrammet och koden. Kortet studsar på slaget och lyser lila på taktens etta.</p></div>';
+    applyZoom('panel');
   }
   function danceCardClose() {
     var before = dPanelBefore;
@@ -4031,6 +4112,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
     if (location.hash !== before.hash && routeHash()) return;  // opened during Dance: show it again
     panel.innerHTML = before.html;
     panel.className = before.cls;
+    applyZoom('panel');
   }
   function danceLineChanged(i) { danceApply(danceTargetAt(i, 0)); danceCard(i); }
   function danceWordChanged(i, w) { danceApply(danceTargetAt(i, w)); danceCard(i); danceCardWords(i, w); }
