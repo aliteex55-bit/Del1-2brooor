@@ -203,6 +203,32 @@ body.view-fix .vstart, body.view-bug .vnow { display: none; }
 .beatbar span { width: 10px; height: 10px; border-radius: 50%; background: var(--line); transition: background .08s, transform .08s; }
 .beatbar span.on { background: var(--ok); transform: scale(1.35); }
 .beatbar span.on:first-child { background: var(--mark); transform: scale(1.7); }
+.pbeats { display: none; gap: 6px; align-items: center; margin: 0 6px; }
+body.view-dance .pbeats { display: flex; }
+.pbeats span { width: 8px; height: 8px; border-radius: 50%; background: var(--line); transition: background .08s, transform .08s; }
+.pbeats span.on { background: var(--ok); transform: scale(1.35); }
+.pbeats span.on:first-child { background: var(--mark); transform: scale(1.7); }
+.dexp { padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); transform-origin: 50% 100%; }
+.dnow { display: flex; gap: 12px; align-items: center; margin-bottom: 6px; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+.dnowtag { color: var(--mark); font-weight: 700; }
+.dline { margin: 0 0 12px; font-size: 1.2em; font-weight: 600; line-height: 1.45; }
+.dline .w { transition: color .15s; }
+.dline .w.done { color: var(--accent); }
+.dline .w.on { color: var(--ok); }
+.dline code { font: .85em Consolas, "Cascadia Mono", monospace; background: var(--code-bg); border: 1px solid var(--line); border-radius: 3px; padding: 0 3px; }
+.dexp h2 { margin: 0 0 6px; }
+.dchip { display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; vertical-align: middle; background: var(--ok-soft); color: var(--ok); }
+.dchip.ext { background: var(--accent-soft); color: var(--accent); }
+.dlay { margin: 8px 0 0; }
+.dlay b { color: var(--ok); margin-right: 4px; }
+.dcode { margin: 8px 0; padding: 8px 10px; border-radius: 6px; background: var(--code-bg); border: 1px solid var(--line); white-space: pre-wrap; }
+.dparts { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; }
+.dparts span { padding: 2px 8px; border: 1px solid var(--line); border-radius: 6px; font: 13px Consolas, "Cascadia Mono", monospace; }
+@keyframes dexpbop { 0% { transform: none; } 25% { transform: translateY(calc(-5px * var(--amp, .7))) scale(1.006); } 100% { transform: none; } }
+@keyframes dexpbop1 { 0% { transform: none; box-shadow: 0 0 0 0 transparent; } 20% { transform: translateY(calc(-8px * var(--amp, .7))) scale(1.012); box-shadow: 0 0 0 2px var(--mark), 0 0 28px var(--mark); } 100% { transform: none; box-shadow: 0 0 0 0 transparent; } }
+.dexp.bop { animation: dexpbop .32s ease-out; }
+.dexp.bop-down { animation: dexpbop1 .55s ease-out; }
+@media (prefers-reduced-motion: reduce) { .dexp.bop, .dexp.bop-down { animation: none; } }
 @media (prefers-reduced-motion: reduce) { .node.bop, .cdm.bop, .cdc.bop, .node.bop-down, .cdm.bop-down, .cdc.bop-down, .lyline.now.sway-l, .lyline.now.sway-r, .lyline.now .w.on { animation: none; } }
 .splitter { flex: 0 0 7px; cursor: col-resize; background: var(--line); opacity: .45; }
 .splitter:hover, .splitter.drag, .splitter:focus-visible { opacity: 1; background: var(--accent); outline: none; }
@@ -516,6 +542,20 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
   text-transform: uppercase; letter-spacing: .2em; box-shadow: 0 0 20px rgba(98, 243, 255, .4); }
 /* The Layout menu opens over the views, so the header lies above main */
 :root[data-theme="dark"] body header { z-index: 5; }
+
+/* Asked for: Förklaring dances to the music. The card in Dance as a HUD panel: the "sung now" tag
+   blinks purple (the theme's beat-1 colour), and the glow on beat 1 stays purple. */
+:root[data-theme="dark"] body .dexp { border: 1px solid rgba(98, 243, 255, .32); border-radius: 0;
+  background: linear-gradient(160deg, rgba(14, 90, 125, .28), rgba(3, 22, 36, .55) 60%, rgba(98, 243, 255, .05)); box-shadow: inset 0 0 40px rgba(98, 243, 255, .06); }
+:root[data-theme="dark"] body .dnowtag { text-shadow: 0 0 10px var(--mark); letter-spacing: .3em; }
+:root[data-theme="dark"] body .dnowtag::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 8px; border-radius: 50%;
+  background: var(--mark); box-shadow: 0 0 10px var(--mark); animation: hudblink .6405s steps(2) infinite; }
+:root[data-theme="dark"] body .dline { color: #fff; text-shadow: 0 0 12px rgba(91, 140, 255, .55); }
+:root[data-theme="dark"] body .dexp h2 { color: var(--hud); letter-spacing: .04em; }
+:root[data-theme="dark"] body .dchip { border-radius: 0; }
+:root[data-theme="dark"] body .pbeats span { background: rgba(98, 243, 255, .25); }
+:root[data-theme="dark"] body .pbeats span.on { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+:root[data-theme="dark"] body .pbeats span.on:first-child { background: var(--mark); box-shadow: 0 0 12px var(--mark); }
 
 </style>
 </head>
@@ -2662,7 +2702,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
           tabs.appendChild(b);
         });
         act.classList.add('intabs');
-        act.querySelector('.panebar').insertBefore(tabs, act.querySelector('.panectl'));
+        act.querySelector('.panebar').insertBefore(tabs, act.querySelector('.panetitle').nextSibling);
       }
       return el;
     }
@@ -3290,17 +3330,27 @@ if (typeof module !== 'undefined') module.exports = KK2;
   // On each beat the lit things bounce, more on beat 1 and more when the song is loud there.
   var DB = DATA.dance.beats, DBL = DATA.dance.beatLoudness, DPOS = DATA.dance.barPos, dBeat = -1, dSway = 1;
   var beatDots = document.querySelectorAll('#beatbar span');
+  // The explanation view's own four beat marks, in its bar, shown in Dance.
+  var panelDots = (function () {
+    var bar = document.querySelector('#pane-panel .panebar'), d = document.createElement('span');
+    d.className = 'pbeats';
+    d.setAttribute('aria-hidden', 'true');
+    d.innerHTML = '<span></span><span></span><span></span><span></span>';
+    bar.insertBefore(d, bar.querySelector('.panectl'));
+    return d.querySelectorAll('span');
+  })();
   function danceBeatAt(t) {
     var lo = 0, hi = DB.length - 1, found = -1;
     while (lo <= hi) { var mid = (lo + hi) >> 1; if (DB[mid] <= t) { found = mid; lo = mid + 1; } else hi = mid - 1; }
     return found;
   }
-  var BOP = '.node.multi, .node.sel, .cdm.sel, .cdm.rel, .cdc.sel, #codepane tr.blk';
+  var BOP = '.node.multi, .node.sel, .cdm.sel, .cdm.rel, .cdc.sel, #codepane tr.blk, #panel .dexp';
   function danceStill() {
     document.querySelectorAll('.bop, .bop-down').forEach(function (e) { e.classList.remove('bop', 'bop-down'); });
     var line = lyricsEl.querySelector('.lyline.now');
     if (line) line.classList.remove('sway-l', 'sway-r');
     beatDots.forEach(function (d) { d.classList.remove('on'); });
+    panelDots.forEach(function (d) { d.classList.remove('on'); });
   }
   function dancePulse(b) {
     // A bar position of -1 means the analysis could not settle where this beat sits in its bar:
@@ -3312,7 +3362,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
     void document.body.offsetWidth;    // so the same animation starts again on this beat
     els.forEach(function (e) { e.classList.add(pos === 0 ? 'bop-down' : 'bop'); });
     if (line) { dSway = -dSway; line.classList.add(dSway > 0 ? 'sway-r' : 'sway-l'); }
-    if (pos >= 0) beatDots[pos].classList.add('on');
+    if (pos >= 0) { beatDots[pos].classList.add('on'); panelDots[pos].classList.add('on'); }
     // Asked for: the HUD look, pulsing to the music. The arc reactor kicks and the background
     // flashes on the song's own beats (purple on beat 1), and the particle net brightens.
     [hudReactor, hudFlash].forEach(function (e) { e.classList.remove('beat', 'beat1'); });
@@ -3384,7 +3434,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
   // extension, or a line in the code now. The target becomes the focus, as if it was clicked, so
   // the boxes, the class diagram and the code light up together. A line without targets keeps the
   // focus of the line before.
-  var dTarget = null;
+  var dTarget = null, dSpec = null;
   function danceTargetAt(i, w) {
     var ts = DL[i].targets || [], t = null;
     ts.forEach(function (x) { if (x[0] <= Math.max(w, 0)) t = x[1]; });
@@ -3395,6 +3445,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
     var key = JSON.stringify(spec);
     if (key === dTarget) return;
     dTarget = key;
+    dSpec = spec;
     if (spec.c) focusClass(spec.c);
     else if (spec.m) focusMember(spec.m);
     else if (spec.b) focusBug(spec.b);
@@ -3413,8 +3464,86 @@ if (typeof module !== 'undefined') module.exports = KK2;
       if (r.top < br.top || r.bottom > br.bottom) b.scrollTop += r.top - br.top - b.clientHeight / 3;
     }
   }
-  function danceLineChanged(i) { danceApply(danceTargetAt(i, 0)); }
-  function danceWordChanged(i, w) { danceApply(danceTargetAt(i, w)); }
+  // Asked for: Förklaring dances to the music too. In Dance the explanation view shows what the
+  // sung line is about: the line itself on top (its words light up as they are sung, like in the
+  // lyrics), and under it the part, class, bug or code line that the line lights up, explained. The
+  // card bounces on every beat and glows purple on beat 1, and its own four beat marks light up
+  // like the ones under the song. It writes only into the explanation view: the address and the
+  // chosen box stay as they are, a click on a box still shows that box until the song reaches the
+  // next line, and leaving Dance brings back what the explanation showed before.
+  var dCardKey = null, dPanelBefore = null, LAYER_TEXT = {};
+  DATA.bugs.concat(DATA.exts).forEach(function (b) { b.layers.forEach(function (L) { LAYER_TEXT[L.label] = L; }); });
+  function dChips(labels) {
+    return labels.map(function (l) { return '<span class="dchip' + (l.charAt(0) === 'U' ? ' ext' : '') + '">' + esc(l) + '</span>'; }).join('');
+  }
+  function dLayer(L) { return '<p class="dlay"><b>' + esc(L.label) + '</b> ' + esc(L.solution) + '</p>'; }
+  function danceExplain(spec) {
+    if (!spec) return '';
+    if (spec.m && CD[spec.m]) {
+      var m = CD[spec.m];
+      return '<h2>' + esc(m.head) + dChips(m.layers.map(function (L) { return L.label; })) + '</h2><p class="cdsig">' + sig(m) + '</p>' +
+        '<div class="say"><b>Enkelt förklarat</b>' + esc(m.say) + '</div>' + m.layers.map(dLayer).join('');
+    }
+    if (spec.c && CLS[spec.c]) {
+      var c = CLS[spec.c], ms = DATA.members.filter(function (x) { return x.cls === spec.c; });
+      return '<h2>' + esc(c.stereo || 'Klassen ' + c.id) + '</h2><div class="say"><b>Enkelt förklarat</b>' + esc(c.say) + '</div>' +
+        '<p class="dparts">' + ms.map(function (x) {
+          // A part of Program.cs is named "Program.cs: ...", a member "Class.Member": the card shows the part after that.
+          var name = x.head.indexOf(': ') >= 0 ? x.head.slice(x.head.indexOf(': ') + 2) : x.head.replace(/^[^.]*\./, '');
+          return '<span>' + esc(name) + '</span>';
+        }).join('') + '</p>';
+    }
+    if (spec.b) {
+      var b = DATA.bugs.concat(DATA.exts).filter(function (x) { return String(x.key) === String(spec.b); })[0];
+      if (!b) return '';
+      var ext = String(b.key).charAt(0) === 'U';
+      return '<h2>' + (ext ? 'Utbyggnad ' : 'Fel ') + esc(String(b.key)) + ': ' + esc(b.kort) + '</h2>' +
+        '<p class="what">' + esc(b.typ || '') + (b.layers.length ? (b.typ ? ' · ' : '') + b.layers.length + ' lager' : '') + '</p>' + b.layers.map(dLayer).join('');
+    }
+    if (spec.l) {
+      var file = spec.l[0], n = spec.l[1], text = (DATA.code.now.files[file] || '').split('\n')[n - 1] || '';
+      var mm = DATA.members.filter(function (x) { return x.file === file && x.now && x.now.from <= n && n <= x.now.to; })[0];
+      var lay = (DATA.lineLayer[file] || {})[n];
+      return '<h2>' + esc(file) + ' rad ' + n + (lay ? dChips([lay]) : '') + '</h2><pre class="dcode"><code>' + esc(text.trim()) + '</code></pre>' +
+        (mm ? '<p class="what">Hör till ' + esc(mm.head) + '.</p><div class="say"><b>Enkelt förklarat</b>' + esc(mm.say) + '</div>' : '') +
+        (lay && LAYER_TEXT[lay] ? dLayer(LAYER_TEXT[lay]) : '');
+    }
+    return '';
+  }
+  function danceCardOpen() { if (dPanelBefore === null) dPanelBefore = panel.innerHTML; }
+  function danceCard(i) {
+    if (!inDanceView() || i < 0) return;
+    var key = i + '|' + dTarget;
+    if (key === dCardKey) return;
+    dCardKey = key;
+    danceCardOpen();
+    var line = lyricsEl.querySelector('.lyline[data-i="' + i + '"]'), body = danceExplain(dSpec);
+    panel.innerHTML = '<div class="dexp" data-line="' + i + '"><div class="dnow"><span class="dnowtag">♪ Sjungs nu</span><span>' + esc(DL[i].section || '') + '</span></div>' +
+      '<p class="dline">' + (line ? line.innerHTML : esc(DL[i].text)) + '</p>' +
+      (body || '<p class="what">Den här raden lyser inte upp någon del av koden. Nästa rad som gör det förklaras här.</p>') + '</div>';
+    panel.scrollTop = 0;
+  }
+  function danceCardWords(i, w) {
+    var c = panel.querySelector('.dexp[data-line="' + i + '"] .dline');
+    if (!c) return;
+    c.querySelectorAll('.w').forEach(function (e) { var n = +e.getAttribute('data-w'); e.classList.toggle('done', n <= w); e.classList.toggle('on', n === w); });
+  }
+  // Before the first sung line: what the card will do.
+  function danceCardIntro() {
+    if (!inDanceView()) return;
+    danceCardOpen();
+    dCardKey = null;
+    panel.innerHTML = '<div class="dexp"><div class="dnow"><span class="dnowtag">♪ Dance</span></div><h2>The Farm Called C-Sharp</h2>' +
+      '<p class="what">Förklaringen följer låten. Raden som sjungs står här överst, och under den förklaras det som raden lyser upp ' +
+      'i flödet, klassdiagrammet och koden. Kortet studsar på slaget och lyser lila på taktens etta.</p></div>';
+  }
+  function danceCardClose() {
+    if (dPanelBefore !== null && panel.querySelector('.dexp')) panel.innerHTML = dPanelBefore;
+    dPanelBefore = null;
+    dCardKey = null;
+  }
+  function danceLineChanged(i) { danceApply(danceTargetAt(i, 0)); danceCard(i); }
+  function danceWordChanged(i, w) { danceApply(danceTargetAt(i, w)); danceCard(i); danceCardWords(i, w); }
   dAudio.addEventListener('play', function () { cancelAnimationFrame(dRaf); dRaf = requestAnimationFrame(danceTick); });
   dAudio.addEventListener('seeked', function () { if (dAudio.paused) danceTick(); });
   dAudio.addEventListener('pause', function () { cancelAnimationFrame(dRaf); });
@@ -3453,6 +3582,8 @@ if (typeof module !== 'undefined') module.exports = KK2;
   // song and switches back to the layout of Problem and Lösning, which has no Dance view.
   function danceViewChanged(on) {
     if (!layout) return;
+    if (on) { dCardKey = null; if (dLine >= 0) danceCard(dLine); else danceCardIntro(); }
+    else danceCardClose();
     var want = on ? layout.dance : layout.normal, changed = layout.tree !== want;
     layout.tree = want;
     if (on && !inLayout('dance')) { addToTree('dance'); changed = true; }
