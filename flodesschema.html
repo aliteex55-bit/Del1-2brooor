@@ -208,6 +208,8 @@ body.view-fix .vstart, body.view-bug .vnow { display: none; }
 .splitter:hover, .splitter.drag, .splitter:focus-visible { opacity: 1; background: var(--accent); outline: none; }
 .vyer { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
 .viewtoggle { padding: 4px 9px; }
+.textsize { display: flex; gap: 6px; align-items: center; }
+#textval { min-width: 52px; text-align: center; font: 600 15px Consolas, "Cascadia Mono", monospace; }
 .viewtoggle[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); }
 .viewtoggle[aria-pressed="false"] { color: var(--muted); text-decoration: line-through; }
 #vylayout { font: inherit; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 5px 6px; }
@@ -327,11 +329,11 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
 :root[data-theme="dark"] body header { background: rgba(2, 12, 22, .55); border-bottom: 1px solid var(--hud-dim); box-shadow: 0 1px 18px rgba(98, 243, 255, .18); }
 :root[data-theme="dark"] body header h1 { text-transform: uppercase; letter-spacing: .22em; font-weight: 700; font-size: 16px; color: #eaffff;
   text-shadow: -1.5px 0 rgba(255, 60, 90, .6), 1.5px 0 rgba(60, 220, 255, .85), 0 0 16px rgba(98, 243, 255, .55); }
-:root[data-theme="dark"] body header .hint { color: var(--muted); font-size: 12px; }
+:root[data-theme="dark"] body header .hint { color: var(--muted); font-size: 14px; }
 /* :where() keeps these two rules light, so every button's own state and colour (on, pressed, off,
    solved, red Fel, blue U) still wins over them; the HUD only gives shape and the base colour */
 :where(:root[data-theme="dark"]) button, :where(:root[data-theme="dark"]) select { background: var(--hud-faint); border: 1px solid var(--hud-dim); color: var(--hud);
-  border-radius: 0; text-transform: uppercase; letter-spacing: .14em; font-size: 12px; font-weight: 600;
+  border-radius: 0; text-transform: uppercase; letter-spacing: .12em; font-size: 14px; font-weight: 600;
   clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%); }
 :where(:root[data-theme="dark"]) button:hover { background: rgba(98, 243, 255, .16); }
 :root[data-theme="dark"] body .viewbtn[data-view="bug"][aria-pressed="true"] { background: var(--accent); color: var(--bg); box-shadow: 0 0 22px var(--accent); }
@@ -339,7 +341,7 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
 :root[data-theme="dark"] body .viewbtn[data-view="dance"][aria-pressed="true"] { background: var(--mark); color: var(--bg); box-shadow: 0 0 26px var(--mark); }
 /* The Fel and U buttons keep their square shape (their purple ring must show) */
 :root[data-theme="dark"] body .bugbtn { clip-path: none; }
-:root[data-theme="dark"] body .extlabel { color: var(--muted); letter-spacing: .25em; text-transform: uppercase; font-size: 11px; }
+:root[data-theme="dark"] body .extlabel { color: var(--muted); letter-spacing: .2em; text-transform: uppercase; font-size: 13px; }
 :root[data-theme="dark"] body .viewtoggle[aria-pressed="true"] { background: rgba(98, 243, 255, .16); border-color: var(--hud); }
 
 /* Views: floating holo panels with cut corners, corner brackets and a sweeping top line */
@@ -356,7 +358,7 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
 @keyframes hudsweep { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
 :root[data-theme="dark"] body .splitter { background: transparent; }
 :root[data-theme="dark"] body .panebar { background: rgba(2, 14, 24, .5); border-bottom: 1px solid rgba(98, 243, 255, .22); }
-:root[data-theme="dark"] body .panetitle { color: var(--hud); text-transform: uppercase; letter-spacing: .3em; font-size: 11px; }
+:root[data-theme="dark"] body .panetitle { color: var(--hud); text-transform: uppercase; letter-spacing: .24em; font-size: 13px; }
 :root[data-theme="dark"] body .panetitle::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 8px; border-radius: 50%;
   background: var(--hud); box-shadow: 0 0 10px var(--hud); animation: hudblink .6405s steps(2) infinite; }
 @keyframes hudblink { 50% { opacity: .2; } }
@@ -388,12 +390,12 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
 :root[data-theme="dark"] body .code tr.blk { outline: 1px solid rgba(224, 176, 64, .6); outline-offset: -1px; }
 :root[data-theme="dark"] body .code tr.blk td:last-child { position: relative; }
 :root[data-theme="dark"] body .code tr.blk td:last-child::after { content: "LOCKED"; position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
-  font: 700 9px "Bahnschrift", "Segoe UI", sans-serif; letter-spacing: .25em; color: var(--warn); text-shadow: 0 0 8px var(--warn); }
+  font: 700 11px "Bahnschrift", "Segoe UI", sans-serif; letter-spacing: .2em; color: var(--warn); text-shadow: 0 0 8px var(--warn); }
 :root[data-theme="dark"] body .codetab { clip-path: none; }
 
 /* Dance: the lyrics as a projection; the sung line keeps the theme's blue, sung words blue, the word
    being sung green */
-:root[data-theme="dark"] body .runnote { color: var(--muted); text-transform: uppercase; letter-spacing: .16em; font-size: 11px; }
+:root[data-theme="dark"] body .runnote { color: var(--muted); text-transform: uppercase; letter-spacing: .12em; font-size: 13px; }
 :root[data-theme="dark"] body .lysec { color: var(--hud); letter-spacing: .4em; opacity: .75; }
 :root[data-theme="dark"] body .lyline { color: rgba(170, 220, 245, .42); border-radius: 0; }
 :root[data-theme="dark"] body .lyline.now { color: #f2feff; background: linear-gradient(90deg, var(--accent-soft), transparent);
@@ -433,7 +435,7 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
 @keyframes hudcore { 0% { filter: brightness(1.7); } 100% { filter: brightness(1); } }
 .hudplayer { display: flex; align-items: center; gap: 14px; position: sticky; top: -10px; z-index: 3; padding: 8px 0; margin: -10px 0 0;
   background: linear-gradient(rgba(3, 18, 30, .96) 80%, rgba(3, 18, 30, 0)); }
-.hudread { display: grid; grid-template-columns: auto auto; justify-content: start; gap: 2px 14px; font-size: 10px; letter-spacing: .25em; color: var(--muted); text-transform: uppercase; }
+.hudread { display: grid; grid-template-columns: auto auto; justify-content: start; gap: 2px 14px; font-size: 12px; letter-spacing: .2em; color: var(--muted); text-transform: uppercase; }
 .hudread b { font: 700 20px "Cascadia Mono", Consolas, monospace; letter-spacing: 0; color: #62f3ff; text-shadow: 0 0 10px #62f3ff; }
 #hudnet { position: fixed; inset: 0; z-index: 0; pointer-events: none; display: none; }
 .hudflash { position: fixed; inset: 0; z-index: 0; pointer-events: none; display: none; opacity: 0; background: radial-gradient(circle at 70% 40%, rgba(98, 243, 255, .12), transparent 55%); }
@@ -441,6 +443,23 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
 .hudflash.beat { animation: hudflash .6s ease-out; }
 @keyframes hudflash { 0% { opacity: 1; } 60%, 100% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .hudreactor i, .hudflash, :root[data-theme="dark"] body .pane::before, :root[data-theme="dark"] body .panetitle::before { animation: none !important; } }
+
+/* Asked for: the text was very small. The smallest HUD texts above are larger now, and the lyric
+   section names and the text-size control get readable sizes too. */
+:root[data-theme="dark"] body .lysec { font-size: 14px; letter-spacing: .3em; }
+:root[data-theme="dark"] body .lyline { font-size: 17px; }
+:root[data-theme="dark"] body .lyline.now { font-size: 21px; }
+
+/* Asked for: clearer text. With the larger text the top bar must stay compact: the long help text
+   becomes a tooltip on the title, the Fel buttons show just their number after one "Fel" label,
+   and the buttons sit closer together. */
+:root[data-theme="dark"] body header { gap: 8px 10px; padding: 8px 14px; }
+:root[data-theme="dark"] body header .hint { display: none; }
+:root[data-theme="dark"] body header h1 { cursor: help; }
+:where(:root[data-theme="dark"]) header button, :where(:root[data-theme="dark"]) header select { letter-spacing: .06em; padding: 5px 10px; }
+:root[data-theme="dark"] body .felw { display: none; }
+:root[data-theme="dark"] body #bugs::before { content: "Fel"; color: var(--muted); letter-spacing: .2em; text-transform: uppercase; font-size: 13px; align-self: center; margin-right: 4px; }
+:root[data-theme="dark"] body .bugbtn { padding: 5px 9px; min-width: 34px; }
 
 </style>
 </head>
@@ -459,6 +478,7 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
   <button type="button" class="codebtn" id="cdbtn">Klassdiagram</button>
   <button type="button" class="codebtn runbtn" id="runbtn">Kör programmet</button>
   <div class="vyer" role="group" aria-label="Vyer"><span class="extlabel">Vyer</span><button type="button" class="viewtoggle" data-pane="flow" aria-pressed="true">Flöde</button><button type="button" class="viewtoggle" data-pane="class" aria-pressed="true">Klassdiagram</button><button type="button" class="viewtoggle" data-pane="code" aria-pressed="true">Kod</button><button type="button" class="viewtoggle" data-pane="panel" aria-pressed="true">Förklaring</button><button type="button" class="viewtoggle" data-pane="run" aria-pressed="false">Kör</button><button type="button" class="viewtoggle" data-pane="dance" aria-pressed="false">Dance</button><select id="vylayout" aria-label="Färdig layout"><option value="">Layout …</option><option value="alla">Allt sida vid sida</option><option value="schema">Schema och förklaring</option><option value="kod">Flöde, klassdiagram och kod</option><option value="kor">Flöde, kod och körning</option><option value="dance">Dance: flöde, klassdiagram, kod och text</option><option value="aterstall">Återställ allt</option></select></div>
+  <div class="textsize" role="group" aria-label="Textstorlek"><span class="extlabel">Text</span><button type="button" id="textminus" aria-label="Mindre text">A−</button><span id="textval">115 %</span><button type="button" id="textplus" aria-label="Större text">A+</button></div>
   <div class="nav">
     <button id="prev" type="button">← Föregående</button>
     <span class="pos" id="pos"></span>
@@ -1682,7 +1702,8 @@ if (typeof module !== 'undefined') module.exports = KK2;
     btn.setAttribute('data-n', b.n);
     btn.setAttribute('data-key', b.key);
     btn.title = b.typ + ': ' + b.kort + (b.status ? ' (' + b.status + ')' : '');
-    btn.textContent = 'Fel ' + b.n;
+    // The word Fel is its own piece, so the compact top bar can show just the number.
+    btn.innerHTML = '<span class="felw">Fel </span>' + b.n;
     var tick = document.createElement('span');
     tick.className = 'tick';
     tick.textContent = ' ✓';
@@ -2528,9 +2549,29 @@ if (typeof module !== 'undefined') module.exports = KK2;
   }
   // Zoom: the drawings get wider (and the view scrolls), the code and the explanation get larger.
   // The middle of what is seen stays in place.
+  // Asked for: bigger text. The text size (textScale, chosen at the top, kept in this browser)
+  // multiplies every view's own zoom. The bar at the top keeps its size so it does not wrap.
+  var TEXT_STEPS = [0.8, 0.9, 1, 1.1, 1.15, 1.25, 1.4, 1.6, 1.8, 2];
+  var textScale = 1.15;
+  try { var ts = parseFloat(localStorage.getItem('kk2-text')); if (TEXT_STEPS.indexOf(ts) >= 0) textScale = ts; } catch (e) {}
+  function applyText() {
+    document.getElementById('textval').textContent = Math.round(textScale * 100) + ' %';
+    PANES.forEach(applyZoom);
+    try { localStorage.setItem('kk2-text', String(textScale)); } catch (e) {}
+  }
+  function stepText(dir) {
+    var i = TEXT_STEPS.indexOf(textScale) + dir;
+    if (i < 0 || i >= TEXT_STEPS.length) return;
+    textScale = TEXT_STEPS[i];
+    applyText();
+  }
+  // The long help text in the top bar is a tooltip on the title in the compact HUD bar.
+  (function () { var h = document.querySelector('header .hint'), t = document.querySelector('header h1'); if (h && t) t.title = h.textContent; })();
+  document.getElementById('textminus').addEventListener('click', function () { stepText(-1); });
+  document.getElementById('textplus').addEventListener('click', function () { stepText(1); });
   function applyZoom(p) {
-    var el = paneEl(p), z = layout.zoom[p] || 1, body = el.querySelector('.panebody');
-    el.querySelector('.zoomval').textContent = Math.round(z * 100) + ' %';
+    var el = paneEl(p), own = layout.zoom[p] || 1, z = own * textScale, body = el.querySelector('.panebody');
+    el.querySelector('.zoomval').textContent = Math.round(own * 100) + ' %';
     if (p === 'flow' || p === 'class') {
       var cx = body.scrollWidth ? (body.scrollLeft + body.clientWidth / 2) / body.scrollWidth : 0.5;
       var cy = body.scrollHeight ? (body.scrollTop + body.clientHeight / 2) / body.scrollHeight : 0;
@@ -3130,6 +3171,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
   }
 
   applyLayout();
+  applyText();
   refreshCode();
   if (!layout.hidden.run) ensureRun();
   danceViewChanged(document.body.classList.contains('view-dance'));
