@@ -14,6 +14,8 @@ dotnet run
 
 Sidan öppnar i läget Dance: låten The Farm Called C-Sharp spelas, och raden som sjungs lyser upp det den handlar om i flödet, klassdiagrammet och koden, i takt med musiken. Problem och Lösning finns bredvid.
 
+Vyerna kan placeras fritt. Dra en vy i handtaget ⠿ till en annan vy, så hamnar den bredvid, ovanför, under eller som flik. Färdiga upplägg finns i menyn Layout. I Dance visar Förklaring det raden som sjungs handlar om. Vyn Bygget skriver samtidigt hela programmet i en efterlikning av VS Code, i takt med låten, och bygger och kör det när sista raden har sjungits.
+
 [Klickbart flödesschema över startkoden](https://aliteex55-bit.github.io/Del1-2brooor/flodesschema.html). Röda etiketter som 1-1 visar var felen fanns, fel och lager. I läget Lösning blir de gröna och visar koden efter lagningen.
 
 ## Kodförklaring
