@@ -319,7 +319,7 @@ body.view-dance .pbeats { display: flex; }
 .psplit, .pgroup { display: flex; min-width: 0; min-height: 0; }
 .pgroup { position: relative; }
 .corner { position: absolute; z-index: 6; width: 14px; height: 14px; border-radius: 3px; background: var(--accent); opacity: .55; cursor: nwse-resize; touch-action: none; }
-.corner.br { right: -10.5px; bottom: -10.5px; } .corner.bl { left: -10.5px; bottom: -10.5px; } .corner.tr { right: -10.5px; top: -10.5px; } .corner.tl { left: -10.5px; top: -10.5px; }
+.corner.br { right: -10.5px; bottom: -10.5px; } .corner.bl { left: -10.5px; bottom: -10.5px; cursor: nesw-resize; } .corner.tr { right: -10.5px; top: -10.5px; cursor: nesw-resize; } .corner.tl { left: -10.5px; top: -10.5px; }
 .corner:hover, .corner.drag, .corner:focus-visible { opacity: 1; outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
 .psplit.row { flex-direction: row; }
 .psplit.col, .pgroup { flex-direction: column; }
@@ -2703,15 +2703,19 @@ if (typeof module !== 'undefined') module.exports = KK2;
     var a = dance ? ['flow', 'dance', 'code', 'panel'] : ['flow', 'class', 'code', 'panel'];
     var third = function () { return dance ? T('build', 'code', 'class') : G('code'); };
     if (name === 'alla') return S('row', [a[0], a[1], third(), a[3]], [32, 24, 22, 22]);
-    if (name === '2x2') return S('col', [S('row', [a[0], a[1]], [1.35, 1]), S('row', [third(), a[3]])], [1.1, 1]);
+    // Asked for: resizing only the window it belongs to. Grids are built as columns, so moving a
+    // divider up or down only changes the windows in that column, not the one next to it.
+    if (name === '2x2') return S('row', [S('col', [a[0], third()], [1.1, 1]), S('col', [a[1], a[3]], [1.1, 1])], [1.35, 1]);
     if (name === '3+1') return S('col', [S('row', [a[0], a[1], third()]), a[3]], [1.7, 1]);
     if (name === '1+3') return S('row', [a[0], S('col', [a[1], third(), a[3]])], [1.3, 1]);
     // Asked for: a layout with two views above, two below and two at the bottom, and one with six
     // views side by side. Six views: in Dance the lyrics, Bygget, the code, the class diagram and the
     // explanation beside the flow chart; otherwise the flow chart, the class diagram, the code, the
     // explanation, Kör and Bygget.
-    var six = dance ? ['flow', 'dance', 'build', 'code', 'class', 'panel'] : ['flow', 'class', 'code', 'panel', 'run', 'build'];
-    if (name === '2+2+2') return S('col', [S('row', six.slice(0, 2)), S('row', six.slice(2, 4)), S('row', six.slice(4, 6))]);
+    // Asked for: this as the starting layout in Dance (the user's own arrangement): Flödesschema,
+    // Bygget and Förklaring on the left, Klassdiagram, Koden and Lyrics on the right.
+    var six = dance ? ['flow', 'class', 'build', 'code', 'panel', 'dance'] : ['flow', 'class', 'code', 'panel', 'run', 'build'];
+    if (name === '2+2+2') return S('row', [S('col', [six[0], six[2], six[4]]), S('col', [six[1], six[3], six[5]])]);
     if (name === 'sex') return S('row', six);
     // Asked for: all the views visible at once: in Dance all seven, four above and three below.
     if (name === 'alla7') return dance ? S('col', [S('row', ['flow', 'dance', 'build', 'code']), S('row', ['class', 'panel', 'run'])], [1.2, 1])
@@ -2720,7 +2724,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
     if (name === 'flikar') return S('row', [T(a[0], a[1]), dance ? T('build', 'code', 'panel', 'class') : T('code', 'panel')]);
     if (name === 'kor') return S('row', ['flow', 'code', 'run'], [34, 30, 36]);
     if (name === 'schema') return S('row', ['flow', 'panel']);
-    return dance ? presetTree('2x2', true) : presetTree('alla', false);
+    return dance ? presetTree('2+2+2', true) : presetTree('alla', false);
   }
   function validTree(n, seen) {
     seen = seen || {};
@@ -2759,6 +2763,16 @@ if (typeof module !== 'undefined') module.exports = KK2;
     for (var i = 0; i < n.c.length; i++) { var r = groupOf(n.c[i], p, n, i); if (r) return r; }
     return null;
   }
+  // A grid of rows (col[row[a, b], row[c, d], ...] with as many views in every row) as columns
+  // (row[col[a, c], col[b, d]]): the same picture, but a height only changes its own column.
+  function columnsFirst(n) {
+    if (!n || n.t !== 's' || n.d !== 'col' || n.c.length < 2 || n.c[0].t !== 's' || n.c[0].d !== 'row') return n;
+    var k = n.c[0].c.length;
+    if (k < 2 || !n.c.every(function (r) { return r.t === 's' && r.d === 'row' && r.c.length === k; })) return n;
+    var cols = [];
+    for (var j = 0; j < k; j++) cols.push({ t: 's', d: 'col', c: n.c.map(function (r) { return r.c[j]; }), w: n.w.slice() });
+    return { t: 's', d: 'row', c: cols, w: n.c[0].w.slice() };
+  }
   function panesIn(n) { return !n ? [] : n.t === 'g' ? n.p.slice() : n.c.reduce(function (a, c) { return a.concat(panesIn(c)); }, []); }
   // inLayout: the view is somewhere in the layout. paneOn: it is also the tab shown in its group.
   function inLayout(p) { return !!(layout && groupOf(layout.tree, p)); }
@@ -2769,7 +2783,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
     if (inDanceView()) layout.dance = t; else layout.normal = t;
   }
 
-  var layout = { tree: null, normal: presetTree('alla', false), dance: presetTree('2x2', true), zoom: {} };
+  var layout = { tree: null, normal: presetTree('alla', false), dance: presetTree('2+2+2', true), zoom: {} };
   PANES.forEach(function (p) { layout.zoom[p] = 1; });
   try {
     var savedL = JSON.parse(localStorage.getItem('kk2-layout') || 'null');
@@ -2783,6 +2797,10 @@ if (typeof module !== 'undefined') module.exports = KK2;
         var cg = groupOf(layout.dance, 'code');
         if (cg) { cg.g.p.unshift('build'); cg.g.a = 'build'; } else layout.dance = S('row', [layout.dance, G('build')], [3, 1]);
       }
+      // Asked for: the user's arrangement as the starting layout of Dance, and resizing per window.
+      // Once (v4), Dance starts from that layout again, and a grid saved as rows in Problem and
+      // Lösning becomes columns, looking the same.
+      if (!(savedL.v >= 4)) { layout.dance = presetTree('2+2+2', true); layout.normal = columnsFirst(layout.normal); }
     } else {
       // A layout saved by the earlier version (one row of views) becomes a row of the new tree.
       var old = JSON.parse(localStorage.getItem('kk2-vyer') || 'null');
@@ -2801,7 +2819,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
   } catch (e) {}
   layout.tree = inDanceView() ? layout.dance : layout.normal;
   function saveLayout() {
-    try { localStorage.setItem('kk2-layout', JSON.stringify({ v: 2, normal: layout.normal, dance: layout.dance, zoom: layout.zoom })); } catch (e) {}
+    try { localStorage.setItem('kk2-layout', JSON.stringify({ v: 4, normal: layout.normal, dance: layout.dance, zoom: layout.zoom })); } catch (e) {}
   }
   // Each view's element, found once: while the layout is drawn a view can sit in a part that is
   // not on the page yet, where looking it up by its id would not find it.
@@ -2903,15 +2921,16 @@ if (typeof module !== 'undefined') module.exports = KK2;
     var mx = hub.querySelector('.pane.maxed');
     if (mx && !paneOn(mx.getAttribute('data-pane'))) setMaxed(null);
   }
-  // Asked for: one handle that changes the size both ways, "i en kvadrat". Wherever a divider between
-  // views side by side meets a divider between views above each other, a small square sits in the
-  // middle of the two; dragging it moves both. Where dividers meet in a cross, one square moves all
-  // of them. The squares are made again after the layout or a divider changes.
+  // Asked for: one handle that changes the size both ways, "i en kvadrat", and then "bara en räcker":
+  // one square at each place where dividers meet, in the middle of them. Dragging it moves every
+  // divider that meets there, so where four windows meet in a cross it moves all of them. The
+  // dividers themselves still only change the windows on their own two sides. The squares are made
+  // again after the layout or a divider changes.
   function buildCorners() {
     Array.prototype.slice.call(hub.querySelectorAll('.corner')).forEach(function (c) { c.parentNode.removeChild(c); });
     var junctions = {}, order = [];
     Array.prototype.slice.call(hub.querySelectorAll('.proot .pgroup, .pgroup.proot')).forEach(function (g) {
-      var side = {}, x = g;
+      var side = {}, x = g, laidOut = g.getBoundingClientRect().height > 20;
       while (x.parentNode && x.parentNode.classList && x.parentNode.classList.contains('psplit')) {
         var par = x.parentNode, row = par.classList.contains('row'), nx = x.nextElementSibling, pv = x.previousElementSibling;
         if (nx && nx.classList.contains('splitter') && !side[row ? 'right' : 'bottom']) side[row ? 'right' : 'bottom'] = nx;
@@ -2921,8 +2940,11 @@ if (typeof module !== 'undefined') module.exports = KK2;
       [['right', 'bottom'], ['left', 'bottom'], ['right', 'top'], ['left', 'top']].forEach(function (k) {
         var v = side[k[0]], h = side[k[1]];
         if (!v || !h) return;
+        // The meeting point: the middle of the divider beside and of the divider above or under.
+        // Before the page has its sizes every point looks the same, so then only the pair counts.
         var vr = v.getBoundingClientRect(), hr = h.getBoundingClientRect();
-        var cx = vr.left + vr.width / 2, cy = hr.top + hr.height / 2, key = Math.round(cx / 6) + ',' + Math.round(cy / 6);
+        var key = laidOut ? Math.round((vr.left + vr.width / 2) / 6) + ',' + Math.round((hr.top + hr.height / 2) / 6)
+          : v.getAttribute('data-split') + '|' + h.getAttribute('data-split');
         var j = junctions[key];
         if (!j) { j = junctions[key] = { g: g, at: (k[1] === 'top' ? 't' : 'b') + (k[0] === 'left' ? 'l' : 'r'), sx: [], sy: [] }; order.push(j); }
         if (j.sx.indexOf(v) < 0) j.sx.push(v);
@@ -2934,13 +2956,15 @@ if (typeof module !== 'undefined') module.exports = KK2;
       c.className = 'corner ' + j.at;
       c.tabIndex = 0;
       c.setAttribute('role', 'button');
-      c.setAttribute('aria-label', 'Ändra bredd och höjd samtidigt (dra, eller pilarna åt alla håll)');
+      c.setAttribute('aria-label', 'Ändra bredd och höjd samtidigt där skarvarna möts (dra, eller pilarna åt alla håll)');
       c.title = 'Dra för att ändra bredd och höjd samtidigt';
       c.setAttribute('data-sx', j.sx.map(function (e) { return e.getAttribute('data-split'); }).join(','));
       c.setAttribute('data-sy', j.sy.map(function (e) { return e.getAttribute('data-split'); }).join(','));
       j.g.appendChild(c);
     });
   }
+  addEventListener('load', function () { buildCorners(); });
+  addEventListener('resize', function () { buildCorners(); });
   function afterShow(p) {
     if (p === 'dance' && typeof lyricsEl !== 'undefined' && lyricsEl) { var ln = lyricsEl.querySelector('.lyline.now'); if (ln) danceScrollTo(ln); }
     if (p === 'code' && codeStale) refreshCode();
