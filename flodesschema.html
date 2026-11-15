@@ -294,7 +294,7 @@ body.view-dance .pbeats { display: flex; }
 @keyframes dexpbop1 { 0% { transform: none; box-shadow: 0 0 0 0 transparent; } 20% { transform: translateY(calc(-8px * var(--amp, .7))) scale(1.012); box-shadow: 0 0 0 2px var(--mark), 0 0 28px var(--mark); } 100% { transform: none; box-shadow: 0 0 0 0 transparent; } }
 .dexp.bop { animation: dexpbop .32s ease-out; }
 .dexp.bop-down { animation: dexpbop1 .55s ease-out; }
-@media (prefers-reduced-motion: reduce) { .dexp.bop, .dexp.bop-down { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .dexp.bop, .dexp.bop-down { animation: none; } .pbeats span, .beatbar span { transition: none; } .pbeats span.on, .beatbar span.on { transform: none; } }
 @media (prefers-reduced-motion: reduce) { .node.bop, .cdm.bop, .cdc.bop, .node.bop-down, .cdm.bop-down, .cdc.bop-down, .lyline.now.sway-l, .lyline.now.sway-r, .lyline.now .w.on { animation: none; } }
 .splitter { flex: 0 0 7px; cursor: col-resize; background: var(--line); opacity: .45; touch-action: none; }
 .splitter:hover, .splitter.drag, .splitter:focus-visible { opacity: 1; background: var(--accent); outline: none; }
@@ -564,7 +564,7 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
 :root[data-theme="dark"] body #hudnet, :root[data-theme="dark"] body.view-dance .hudflash { display: block; }
 .hudflash.beat { animation: hudflash .6s ease-out; }
 @keyframes hudflash { 0% { opacity: 1; } 60%, 100% { opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .hudreactor i, .hudflash, :root[data-theme="dark"] body .pane::before, :root[data-theme="dark"] body .panetitle::before { animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { .hudreactor i, .hudflash, :root[data-theme="dark"] body .pane::before, :root[data-theme="dark"] body .panetitle::before, :root[data-theme="dark"] body .dnowtag::before { animation: none !important; } }
 
 /* Asked for: the text was very small. The smallest HUD texts above are larger now, and the lyric
    section names and the text-size control get readable sizes too. */
@@ -3455,7 +3455,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
         el.classList.add('now');
         if (paneOn('dance')) danceScrollTo(el);
         danceLineChanged(i);
-      }
+      } else danceCardIntro();
     }
     if (i >= 0) {
       var ws = DEV[e].w, w = -1;
@@ -3667,12 +3667,20 @@ if (typeof module !== 'undefined') module.exports = KK2;
     }
     return '';
   }
-  function danceCardOpen() { if (dPanelBefore === null) dPanelBefore = panel.innerHTML; }
+  var dCardLine = -1;
+  function danceCardOpen() {
+    if (dPanelBefore === null) dPanelBefore = { html: panel.innerHTML, cls: panel.className, hash: location.hash };
+    panel.setAttribute('aria-live', 'off');
+  }
+  // The keyboard focus is inside the explanation: the card waits until it leaves.
+  function danceCardBusy() { var f = document.activeElement; return !!(f && f !== panel && panel.contains(f)); }
   function danceCard(i) {
     if (!inDanceView() || i < 0) return;
+    if (!panel.querySelector('.dexp') && dCardLine === i) return;    // opened by the user during this line
     var key = i + '|' + dTarget;
-    if (key === dCardKey) return;
+    if (key === dCardKey || danceCardBusy()) return;
     dCardKey = key;
+    dCardLine = i;
     danceCardOpen();
     var line = lyricsEl.querySelector('.lyline[data-i="' + i + '"]'), body = danceExplain(dSpec);
     panel.innerHTML = '<div class="dexp" data-line="' + i + '"><div class="dnow"><span class="dnowtag">♪ Sjungs nu</span><span>' + esc(DL[i].section || '') + '</span></div>' +
@@ -3687,7 +3695,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
   }
   // Before the first sung line: what the card will do.
   function danceCardIntro() {
-    if (!inDanceView()) return;
+    if (!inDanceView() || danceCardBusy()) return;
     danceCardOpen();
     dCardKey = null;
     panel.innerHTML = '<div class="dexp"><div class="dnow"><span class="dnowtag">♪ Dance</span></div><h2>The Farm Called C-Sharp</h2>' +
@@ -3695,9 +3703,16 @@ if (typeof module !== 'undefined') module.exports = KK2;
       'i flödet, klassdiagrammet och koden. Kortet studsar på slaget och lyser lila på taktens etta.</p></div>';
   }
   function danceCardClose() {
-    if (dPanelBefore !== null && panel.querySelector('.dexp')) panel.innerHTML = dPanelBefore;
+    var before = dPanelBefore;
     dPanelBefore = null;
     dCardKey = null;
+    dCardLine = -1;
+    if (!before) return;
+    panel.setAttribute('aria-live', 'polite');
+    if (!panel.querySelector('.dexp')) return;                 // the user's own choice is showing
+    if (location.hash !== before.hash && routeHash()) return;  // opened during Dance: show it again
+    panel.innerHTML = before.html;
+    panel.className = before.cls;
   }
   function danceLineChanged(i) { danceApply(danceTargetAt(i, 0)); danceCard(i); }
   function danceWordChanged(i, w) { danceApply(danceTargetAt(i, w)); danceCard(i); danceCardWords(i, w); }
@@ -3739,7 +3754,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
   // song and switches back to the layout of Problem and Lösning, which has no Dance view.
   function danceViewChanged(on) {
     if (!layout) return;
-    if (on) { dCardKey = null; if (dLine >= 0) danceCard(dLine); else danceCardIntro(); }
+    if (on) { dCardKey = null; dCardLine = -1; if (dLine >= 0) danceCard(dLine); else danceCardIntro(); }
     else danceCardClose();
     var want = on ? layout.dance : layout.normal, changed = layout.tree !== want;
     layout.tree = want;
@@ -4052,6 +4067,9 @@ if (typeof module !== 'undefined') module.exports = KK2;
   hudRun();
   if (document.body.classList.contains('view-dance')) dancePlay();
 
+  // The view named in the address (#...): opened when the page starts, and again when Dance is left
+  // after something was opened during it. Says whether the address named a view.
+  function routeHash() {
   var start = DATA.order.indexOf(location.hash.slice(1));
   if (start >= 0) render(start);
   else if (location.hash === '#felrapport') showReports();
@@ -4063,6 +4081,10 @@ if (typeof module !== 'undefined') module.exports = KK2;
   else if (location.hash === '#klassdiagram') showClassDiagram();
   else if (/^#klass-[A-Za-z]+$/.test(location.hash)) showClass(location.hash.slice(7));
   else if (/^#medlem-[A-Za-z0-9.]+$/.test(location.hash)) showMember(location.hash.slice(8));
+  else return false;
+  return true;
+  }
+  routeHash();
 })();
 </script>
 </body>
