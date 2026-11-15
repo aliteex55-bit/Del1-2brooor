@@ -182,6 +182,9 @@ header .pos:empty { display: none; }
 .hudplayer .hudreactor { transform: scale(.3); margin: -39px; }
 #danceaudio { width: 210px; height: 28px; }
 body.nofull .fullbtn { display: none; }
+.followbtn { display: none; white-space: nowrap; }
+body.view-dance .followbtn { display: inline-block; }
+.followbtn[aria-pressed="true"] { color: var(--accent) !important; font-weight: 700; }
 .pane.maxed { position: fixed !important; inset: 0; z-index: 80; margin: 0 !important; background-color: var(--bg); }
 body.maxing #panes { z-index: 90 !important; }
 .pane:fullscreen { width: 100%; height: 100%; margin: 0 !important; background-color: var(--bg); }
@@ -297,6 +300,12 @@ body.view-dance .pbeats { display: flex; }
 .pbeats span { width: 8px; height: 8px; border-radius: 50%; background: var(--line); transition: background .08s, transform .08s; }
 .pbeats span.on { background: var(--ok); transform: scale(1.35); }
 .pbeats span.on:first-child { background: var(--mark); transform: scale(1.7); }
+.dexp.two { display: flex; gap: 0 28px; align-items: flex-start; }
+.dexp.two > .dhead { flex: 0 1 38%; min-width: 0; }
+.dexp.two > .dbody { flex: 1 1 0; min-width: 0; }
+.dexp.two > .dbody > :first-child { margin-top: 0; }
+.dexp.cols > .dbody { column-count: 2; column-gap: 28px; }
+.dexp .dbody > * { break-inside: avoid; }
 .dexp { padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); transform-origin: 50% 100%; }
 .dnow { display: flex; gap: 12px; align-items: center; margin-bottom: 6px; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
 .dnowtag { color: var(--mark); font-weight: 700; }
@@ -688,6 +697,9 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
 :root[data-theme="dark"] body .hudplayer .beatbar { gap: 7px; height: 20px; }
 :root[data-theme="dark"] body .hudplayer .beatbar span { width: 9px; height: 9px; }
 :root[data-theme="dark"] body header { scrollbar-color: rgba(98, 243, 255, .4) transparent; }
+
+/* Följ in the flow chart's bar: lit while the chart follows the song */
+:root[data-theme="dark"] body .panectl .followbtn[aria-pressed="true"] { color: var(--hud) !important; text-shadow: 0 0 8px var(--hud); }
 
 </style>
 </head>
@@ -3194,30 +3206,97 @@ if (typeof module !== 'undefined') module.exports = KK2;
     if (w <= 0 || h <= 40) return;
     var fit = function (vb) { var q = vb.split(' ').map(Number); return Math.min(w / q[2], h / q[3]); };
     var tall = fit(svg.getAttribute('data-tall')) > fit(svg.getAttribute('data-wide')) * 1.05;
-    if (svg.classList.contains('tall') === tall) return;
+    if (svg.classList.contains('tall') === tall) return false;
     svg.classList.toggle('tall', tall);
     svg.setAttribute('viewBox', svg.getAttribute(tall ? 'data-tall' : 'data-wide'));
     svg.querySelectorAll('.cdk').forEach(function (g) {
       if (tall) g.setAttribute('transform', 'translate(' + g.getAttribute('data-tx') + ' ' + g.getAttribute('data-ty') + ')');
       else g.removeAttribute('transform');
     });
+    return true;
+  }
+  // What the class view is showing, to show it again after the arrangement switches: the chosen
+  // part when it is in view, otherwise the class in the middle of the view (and which point of it).
+  var cdKeptAt = -1e9;
+  function cdShownOnly(list) { return Array.prototype.slice.call(list).filter(function (e) { return e.getClientRects().length; }); }
+  function cdAnchor(body) {
+    var br = body.getBoundingClientRect(), mx = br.left + body.clientWidth / 2, my = br.top + body.clientHeight / 2;
+    var sel = cdShownOnly(body.querySelectorAll('.cdm.sel, .cdc.sel'))[0];
+    if (sel) {
+      var r = sel.getBoundingClientRect();
+      if (r.bottom > br.top && r.top < br.top + body.clientHeight && r.right > br.left && r.left < br.left + body.clientWidth) return { el: sel, fx: 0.5, fy: 0.5 };
+    }
+    var best = null, bd = 1e9;
+    cdShownOnly(body.querySelectorAll('.cdk')).forEach(function (e) {
+      var q = e.getBoundingClientRect(), d = Math.max(q.left - mx, 0, mx - q.right) + Math.max(q.top - my, 0, my - q.bottom);
+      if (d < bd && q.width && q.height) {
+        bd = d;
+        best = { el: e, fx: Math.min(1, Math.max(0, (mx - q.left) / q.width)), fy: Math.min(1, Math.max(0, (my - q.top) / q.height)) };
+      }
+    });
+    return best;
+  }
+  function cdShowAnchor(body, a) {
+    var r = a.el.getBoundingClientRect(), br = body.getBoundingClientRect();
+    body.scrollLeft += r.left + a.fx * r.width - (br.left + body.clientWidth / 2);
+    body.scrollTop += r.top + a.fy * r.height - (br.top + body.clientHeight / 2);
+    cdKeptAt = performance.now();
   }
   // Asked for: the explanation card in Dance fills its view (its text was small with free space
   // around it): the largest zoom at which the whole card fits. The view's own zoom (−, +) is on top
   // of that, 100 % meaning "fills the view".
-  function cardFit(body) {
-    if (!body.clientHeight) return textScale;
-    var lo = 0.4, hi = 3.2;
+  // Asked for next: "the text fills all empty space on this window". In a wide, low view the card
+  // is laid out in columns, so the text can grow until it fills both the width and the height: the
+  // sung line and the title on the left and the explanation on the right, and in a very wide view
+  // the explanation in two columns too. The arrangement that gives the biggest text is used.
+  // The fitted size is set on the card itself (the view keeps the normal text size), so when the
+  // card is replaced, for example by a box clicked while the song plays, the new text has the
+  // normal size and not the card's.
+  function cardZoomNow(body, card) {
+    var lo = 0.4 / textScale, hi = 3.2 / textScale;
     for (var k = 0; k < 10; k++) {
       var mid = (lo + hi) / 2;
-      body.style.zoom = mid;
-      if (body.scrollHeight <= body.clientHeight + 1) lo = mid; else hi = mid;
+      card.style.zoom = mid;
+      if (body.scrollHeight <= body.clientHeight + 1 && body.scrollWidth <= body.clientWidth + 1) lo = mid; else hi = mid;
     }
     return lo;
+  }
+  function cardFit(body, card) {
+    body.style.zoom = textScale;                         // measured at the view's 100 %
+    // In a narrow window (a phone) the views are under each other and each one grows with its
+    // text, so there is no free space to fill: the card keeps the normal size there.
+    card.classList.remove('two', 'cols');
+    card.style.zoom = 1;
+    var h1 = body.clientHeight;
+    card.style.zoom = 2;
+    if (body.clientHeight > h1 + 1) { card.style.zoom = ''; return; }
+    var best = { z: 0, m: [] };
+    [[], ['two'], ['two', 'cols']].forEach(function (m) {
+      card.classList.remove('two', 'cols');
+      m.forEach(function (c) { card.classList.add(c); });
+      var z = cardZoomNow(body, card);
+      if (z > best.z * 1.04) best = { z: z, m: m };      // a simpler arrangement unless clearly better
+    });
+    card.classList.remove('two', 'cols');
+    best.m.forEach(function (c) { card.classList.add(c); });
+    card.style.zoom = best.z;
+  }
+  // The card in two parts: the sung line and the title (dhead), and the explanation (dbody).
+  function cardSplit(card) {
+    var head = document.createElement('div'), rest = document.createElement('div');
+    head.className = 'dhead';
+    rest.className = 'dbody';
+    Array.prototype.slice.call(card.children).forEach(function (e) {
+      (e.matches('.dnow, .dline, h2, .cdsig') && !rest.children.length ? head : rest).appendChild(e);
+    });
+    card.appendChild(head);
+    if (rest.children.length) card.appendChild(rest);
   }
   function applyZoom(p) {
     var el = paneEl(p), own = layout.zoom[p] || 1, z = own * textScale, body = el.querySelector('.panebody');
     el.querySelector('.zoomval').textContent = Math.round(own * 100) + ' %';
+    if (p === 'flow' && typeof followActive === 'function' && followBtn && followActive()) { followApply(false); return; }
+    if (p === 'flow' && followAnim) { cancelAnimationFrame(followAnim); followAnim = 0; }   // following stopped
     if (p === 'flow' || p === 'class') {
       var cx = body.scrollWidth ? (body.scrollLeft + body.clientWidth / 2) / body.scrollWidth : 0.5;
       var cy = body.scrollHeight ? (body.scrollTop + body.clientHeight / 2) / body.scrollHeight : 0;
@@ -3225,13 +3304,15 @@ if (typeof module !== 'undefined') module.exports = KK2;
       var shown = svgs.filter(function (c) { return c.getClientRects().length; })[0];
       // Where the drawing starts in the view (under the help text of the class diagram).
       var top = shown ? shown.getBoundingClientRect().top - body.getBoundingClientRect().top + body.scrollTop : 0;
-      if (p === 'class') cdArrange(body, top);
+      var anchor = p === 'class' ? cdAnchor(body) : null;
+      if (p === 'class' && !cdArrange(body, top)) anchor = null;
       svgs.forEach(function (c) { c.style.width = (drawFit(body, c, top) * own * 100) + '%'; });
+      if (anchor) { cdShowAnchor(body, anchor); return; }
       body.scrollLeft = cx * body.scrollWidth - body.clientWidth / 2;
       body.scrollTop = cy * body.scrollHeight - body.clientHeight / 2;
-    } else if (p === 'panel' && body.querySelector('.dexp')) {
-      body.style.zoom = cardFit(body) * own;
     } else {
+      var card = p === 'panel' && body.querySelector('.dexp');
+      if (card && body.clientHeight) cardFit(body, card);
       body.style.zoom = z;
     }
   }
@@ -3260,6 +3341,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
     else if (act === 'zoomreset') zoomPane(p, 0);
     else if (act === 'hide') showPane(p, false);
     else if (act === 'full') { if (fullEl() === paneEl(p)) leaveFull(); else goFull(paneEl(p)); }
+    else if (act === 'follow') setFollow(!followOn);
   });
   // The keyboard way to move a view: the arrow keys on its handle swap it with the view before or
   // after it.
@@ -3347,8 +3429,10 @@ if (typeof module !== 'undefined') module.exports = KK2;
       if (now === size) return;
       size = now;
       if (!b.clientWidth) return;                       // hidden: keep the middle for later
+      if (id === 'chart' && followAnim && followActive()) return;   // a glide settles at its end
       applyZoom(id === 'chart' ? 'flow' : 'class');     // the drawing fits its new size
-      if (first) { centre(); return; }
+      if (id === 'chart' && followActive()) return;     // following: the lit boxes are in view
+      if (first || (id === 'classbody' && performance.now() - cdKeptAt < 400)) { centre(); return; }
       b.scrollLeft = cx * b.scrollWidth - b.clientWidth / 2;
       b.scrollTop = cy * b.scrollHeight - b.clientHeight / 2;
     }).observe(b);
@@ -3558,6 +3642,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
       if (!moved && Math.abs(dx) + Math.abs(dy) < 5) return;
       moved = true;
       body.classList.add('panning');
+      if (body.id === 'chart' && followActive()) setFollow(false, true);
       body.scrollLeft = sl - dx;
       body.scrollTop = st - dy;
     }
@@ -4011,13 +4096,98 @@ if (typeof module !== 'undefined') module.exports = KK2;
     }
     paintFocus();
     var box = document.querySelector('.node.multi');
-    if (box && paneOn('flow')) chartTo(box);
-    var part = document.querySelector('.cdm.sel, .cdc.sel');
+    if (followActive()) followApply(true);
+    else if (box && paneOn('flow')) chartTo(box);
+    var part = cdShownOnly(document.querySelectorAll('.cdm.sel, .cdc.sel'))[0];
     if (part && paneOn('class')) {
       var b = document.getElementById('classbody'), r = part.getBoundingClientRect(), br = b.getBoundingClientRect();
       if (r.top < br.top || r.bottom > br.bottom) b.scrollTop += r.top - br.top - b.clientHeight / 3;
+      if (r.left < br.left || r.right > br.right) b.scrollLeft += r.left - br.left - b.clientWidth / 3;
     }
   }
+  // Asked for: the flow chart in Dance zooms in on the boxes that are lit, so they can be read, and
+  // follows the song: when the sung line moves on, the view glides to the lit boxes (with some room
+  // around them, so it is clear where in the chart they are), and it shows the whole chart when
+  // nothing is lit. ⌖ Följ in the flow chart's bar turns it off and on (kept in this browser); −
+  // and + zoom from there; dragging the chart by hand turns it off.
+  var followOn = true, followAnim = 0;
+  try { if (localStorage.getItem('kk2-folj') === '0') followOn = false; } catch (e) {}
+  var followBtn = document.createElement('button');
+  followBtn.type = 'button';
+  followBtn.className = 'followbtn';
+  followBtn.setAttribute('data-act', 'follow');
+  followBtn.textContent = '⌖ Följ';
+  (function () { var ctl = document.querySelector('#pane-flow .panectl'); ctl.insertBefore(followBtn, ctl.firstChild); })();
+  function followActive() { return followOn && inDanceView() && paneOn('flow'); }
+  function followShow() {
+    followBtn.setAttribute('aria-pressed', String(followOn));
+    followBtn.title = followOn ? 'Följer det som lyser (klicka för att visa hela schemat)' : 'Följ det som lyser i takt med låten';
+  }
+  // Review fix: when a drag stops following, the zoom on screen becomes the view's zoom, so − and +
+  // go on from what is seen and a new size keeps it. Turning following on again starts from 100 %.
+  function setFollow(on, keepView) {
+    var was = followActive();
+    cancelAnimationFrame(followAnim);
+    followAnim = 0;
+    followOn = on;
+    try { localStorage.setItem('kk2-folj', on ? '1' : '0'); } catch (e) {}
+    followShow();
+    if (keepView) { if (was) followKeep(); return; }
+    if (on && ZOOMS.indexOf(layout.zoom.flow) < 0) { layout.zoom.flow = 1; saveLayout(); }
+    if (followActive()) followApply(true); else applyZoom('flow');
+  }
+  function followKeep() {
+    var body = document.getElementById('chart'), svg = body.querySelector(':scope > svg');
+    if (!svg || !body.clientWidth) return;
+    var cs = getComputedStyle(body), cw = body.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    var sr = svg.getBoundingClientRect(), top = sr.top - body.getBoundingClientRect().top + body.scrollTop;
+    var z = Math.round(sr.width / (drawFit(body, svg, top) * cw) * 100) / 100;
+    if (!(z > 0)) return;
+    layout.zoom.flow = z;
+    svg.style.width = (drawFit(body, svg, top) * z * 100) + '%';
+    paneEl('flow').querySelector('.zoomval').textContent = Math.round(z * 100) + ' %';
+    saveLayout();
+  }
+  // The part of the chart to show: the lit boxes with room around them, in the chart's own units.
+  function followTarget() {
+    var lit = Array.prototype.slice.call(document.querySelectorAll('#chart .node.multi'));
+    if (!lit.length) return null;
+    var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    lit.forEach(function (g) { var b = g.getBBox(); x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y); x1 = Math.max(x1, b.x + b.width); y1 = Math.max(y1, b.y + b.height); });
+    return { cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, w: Math.max(x1 - x0 + 140, 420), h: Math.max(y1 - y0 + 140, 300) };
+  }
+  function followApply(animate) {
+    var body = document.getElementById('chart'), svg = body.querySelector(':scope > svg');
+    if (!svg || !body.clientWidth || !body.clientHeight) return;
+    var vb = svg.viewBox.baseVal, cs = getComputedStyle(body), own = layout.zoom.flow || 1;
+    var cw = body.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    var ch = body.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 6;
+    var vw = body.clientWidth, vh = body.clientHeight, fitS = Math.min(cw / vb.width, ch / vb.height), t = followTarget();
+    var s1 = (t ? Math.max(fitS, Math.min(vw / t.w, vh / t.h, 1.6)) : fitS) * own;
+    var c1 = t ? { x: t.cx, y: t.cy } : { x: vb.x + vb.width / 2, y: vb.y + vb.height / 2 };
+    var br = body.getBoundingClientRect(), sr = svg.getBoundingClientRect();
+    var offX = sr.left - br.left + body.scrollLeft, offY = sr.top - br.top + body.scrollTop, s0 = sr.width / vb.width || s1;
+    var c0 = { x: vb.x + (body.scrollLeft + vw / 2 - offX) / s0, y: vb.y + (body.scrollTop + vh / 2 - offY) / s0 };
+    function put(sc, c) {
+      svg.style.width = (sc * vb.width) + 'px';
+      var b2 = body.getBoundingClientRect(), s2 = svg.getBoundingClientRect();
+      body.scrollLeft += s2.left - b2.left + (c.x - vb.x) * sc - body.clientWidth / 2;
+      body.scrollTop += s2.top - b2.top + (c.y - vb.y) * sc - body.clientHeight / 2;
+    }
+    cancelAnimationFrame(followAnim);
+    followAnim = 0;
+    if (!animate || document.hidden || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) { put(s1, c1); return; }
+    var start = performance.now(), size0 = vw + 'x' + vh;
+    function step(now) {
+      var k = Math.min(1, (now - start) / 450), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      put(s0 + (s1 - s0) * e, { x: c0.x + (c1.x - c0.x) * e, y: c0.y + (c1.y - c0.y) * e });
+      if (k < 1) { followAnim = requestAnimationFrame(step); return; }
+      followAnim = 0;
+      if (body.clientWidth + 'x' + body.clientHeight !== size0) followApply(false);
+    }
+    followAnim = requestAnimationFrame(step);
+  }
+  followShow();
   // Asked for: Förklaring dances to the music too. In Dance the explanation view shows what the
   // sung line is about: the line itself on top (its words light up as they are sung, like in the
   // lyrics), and under it the part, class, bug or code line that the line lights up, explained. The
@@ -4083,6 +4253,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
     panel.innerHTML = '<div class="dexp" data-line="' + i + '"><div class="dnow"><span class="dnowtag">♪ Sjungs nu</span><span>' + esc(DL[i].section || '') + '</span></div>' +
       '<p class="dline">' + (line ? line.innerHTML : esc(DL[i].text)) + '</p>' +
       (body || '<p class="what">Den här raden lyser inte upp någon del av koden. Nästa rad som gör det förklaras här.</p>') + '</div>';
+    cardSplit(panel.querySelector('.dexp'));
     panel.scrollTop = 0;
     applyZoom('panel');
   }
@@ -4099,6 +4270,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
     panel.innerHTML = '<div class="dexp"><div class="dnow"><span class="dnowtag">♪ Dance</span></div><h2>The Farm Called C-Sharp</h2>' +
       '<p class="what">Förklaringen följer låten. Raden som sjungs står här överst, och under den förklaras det som raden lyser upp ' +
       'i flödet, klassdiagrammet och koden. Kortet studsar på slaget och lyser lila på taktens etta.</p></div>';
+    cardSplit(panel.querySelector('.dexp'));
     applyZoom('panel');
   }
   function danceCardClose() {
@@ -4167,6 +4339,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
       }
     }
     if (changed) applyLayout();
+    if (layout) applyZoom('flow');
   }
 
   // Asked for: a view that codes and builds the whole program in an imitation of VS Code, mapped to
