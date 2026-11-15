@@ -212,7 +212,34 @@ body.view-fix .vstart, body.view-bug .vnow { display: none; }
 #textval { min-width: 52px; text-align: center; font: 600 15px Consolas, "Cascadia Mono", monospace; }
 .viewtoggle[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); }
 .viewtoggle[aria-pressed="false"] { color: var(--muted); text-decoration: line-through; }
-#vylayout { font: inherit; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 5px 6px; }
+.proot { flex: 1; }
+.psplit, .pgroup { display: flex; min-width: 0; min-height: 0; }
+.psplit.row { flex-direction: row; }
+.psplit.col, .pgroup { flex-direction: column; }
+.pgroup > .pane { flex: 1 1 0px; }
+.psplit.col > .splitter { cursor: row-resize; }
+#panestore, .dockhint[hidden], .dragghost[hidden] { display: none !important; }
+.panebar .grip { flex: none; padding: 0 5px; border: 0; background: transparent; color: var(--muted); font-size: 16px; line-height: 22px; cursor: grab; touch-action: none; }
+.pane.intabs .panetitle { display: none; }
+.ptabs { display: flex; flex: 1 1 120px; gap: 2px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.ptab { flex: none; padding: 2px 10px; font-size: 13px; font-weight: 600; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: transparent; color: var(--muted); touch-action: none; }
+.ptab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+body.docking, body.docking * { cursor: grabbing !important; user-select: none; }
+.dockhint { position: fixed; z-index: 60; pointer-events: none; display: flex; align-items: center; justify-content: center; border: 2px dashed var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; transition: all .08s; }
+.dragghost { position: fixed; z-index: 61; pointer-events: none; padding: 5px 12px; border: 1px solid var(--accent); border-radius: 6px; background: var(--panel); color: var(--accent); font-weight: 600; box-shadow: 0 6px 20px rgba(0,0,0,.3); }
+.laymenu > summary { list-style: none; cursor: pointer; padding: 5px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); font-weight: 600; white-space: nowrap; }
+.laymenu > summary::-webkit-details-marker { display: none; }
+.laymenu[open] > summary { border-color: var(--accent); background: var(--accent-soft); }
+.laypop { position: fixed; z-index: 70; width: 470px; max-width: calc(100vw - 16px); max-height: calc(100vh - 90px); overflow: auto; padding: 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,.35); }
+.laypop h4 { margin: 0 0 8px; font-size: 12px; letter-spacing: .25em; text-transform: uppercase; color: var(--muted); }
+.presets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+.presets button { display: block; padding: 6px; font-size: 12px; line-height: 1.3; text-align: center; }
+.thumb { height: 38px; display: grid; gap: 2px; margin-bottom: 5px; }
+.thumb i { background: var(--accent); opacity: .4; border-radius: 2px; }
+.thumb i.tb { opacity: .55; box-shadow: inset 0 5px 0 rgba(0,0,0,.25); }
+.thumb i.run { background: var(--ok); }
+.laypop .vyer { margin-bottom: 12px; }
+.laypop p { margin: 0 0 12px; font-size: 13px; line-height: 1.5; color: var(--muted); }
 @keyframes paneflash { from { box-shadow: inset 0 0 0 3px var(--accent); } to { box-shadow: inset 0 0 0 0 transparent; } }
 .pane.flash { animation: paneflash 1s ease-out; }
 .cdhint { color: var(--muted); font-size: 13px; margin: 0 0 8px; }
@@ -299,6 +326,8 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
   main { flex-direction: column; height: auto; }
   .pane { flex: none !important; border-right: 0; border-bottom: 1px solid var(--line); }
   .splitter { display: none; }
+  .psplit.row, .psplit.col { flex-direction: column; }
+  .psplit > *, .pgroup > .pane { flex: none !important; }
   #codepane { max-height: 75vh; }
   #runpane { max-height: 90vh; }
   #chart { border-right: 0; border-bottom: 1px solid var(--line); }
@@ -461,6 +490,33 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
 :root[data-theme="dark"] body #bugs::before { content: "Fel"; color: var(--muted); letter-spacing: .2em; text-transform: uppercase; font-size: 13px; align-self: center; margin-right: 4px; }
 :root[data-theme="dark"] body .bugbtn { padding: 5px 9px; min-width: 34px; }
 
+/* Asked for: place the views freely (rows, columns, tabs). The handle, the tabs, the Layout menu
+   with its pictures and the frame that shows where a dragged view lands, in the HUD look. */
+:root[data-theme="dark"] body .panebar .grip { color: var(--hud); background: transparent; clip-path: none; text-shadow: 0 0 8px var(--hud); }
+:root[data-theme="dark"] body .psplit.col > .pgroup > .pane { margin-top: 2px; margin-bottom: 2px; }
+:root[data-theme="dark"] body .ptab { clip-path: none; background: transparent; border: 0; border-bottom: 2px solid transparent;
+  color: var(--muted); text-transform: uppercase; letter-spacing: .2em; font-size: 13px; padding: 3px 10px; }
+:root[data-theme="dark"] body .ptab:hover { color: var(--text); background: rgba(98, 243, 255, .08); }
+:root[data-theme="dark"] body .ptab[aria-selected="true"] { color: var(--hud); border-bottom-color: var(--hud); text-shadow: 0 0 10px rgba(98, 243, 255, .6); }
+:root[data-theme="dark"] body .laymenu > summary { border: 1px solid var(--hud-dim); border-radius: 0; background: var(--hud-faint); color: var(--hud);
+  text-transform: uppercase; letter-spacing: .06em; padding: 5px 10px;
+  clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px); }
+:root[data-theme="dark"] body .laymenu[open] > summary { border-color: var(--hud); background: rgba(98, 243, 255, .18); box-shadow: 0 0 16px rgba(98, 243, 255, .35); }
+:root[data-theme="dark"] body .laypop { background: rgba(4, 22, 36, .97); border: 1px solid var(--hud); border-radius: 0; box-shadow: 0 0 40px rgba(98, 243, 255, .25);
+  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); }
+:root[data-theme="dark"] body .laypop h4 { color: var(--hud); letter-spacing: .3em; }
+:root[data-theme="dark"] body .presets button { clip-path: none; color: var(--muted); text-transform: none; letter-spacing: .02em; }
+:root[data-theme="dark"] body .presets button:hover { color: var(--text); border-color: var(--hud); }
+:root[data-theme="dark"] body .thumb i { background: rgba(98, 243, 255, .35); opacity: 1; border-radius: 0; }
+:root[data-theme="dark"] body .thumb i.tb { background: rgba(199, 155, 234, .5); }
+:root[data-theme="dark"] body .thumb i.run { background: rgba(99, 208, 137, .5); }
+:root[data-theme="dark"] body .dockhint { border-color: var(--hud); background: rgba(98, 243, 255, .12); color: var(--hud);
+  box-shadow: 0 0 30px rgba(98, 243, 255, .35), inset 0 0 40px rgba(98, 243, 255, .15); text-shadow: 0 0 10px var(--hud); letter-spacing: .25em; }
+:root[data-theme="dark"] body .dragghost { border-color: var(--hud); border-radius: 0; background: rgba(2, 14, 24, .92); color: var(--hud);
+  text-transform: uppercase; letter-spacing: .2em; box-shadow: 0 0 20px rgba(98, 243, 255, .4); }
+/* The Layout menu opens over the views, so the header lies above main */
+:root[data-theme="dark"] body header { z-index: 5; }
+
 </style>
 </head>
 <body>
@@ -477,7 +533,7 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
   <button type="button" class="codebtn" id="codebtn">Hela koden</button>
   <button type="button" class="codebtn" id="cdbtn">Klassdiagram</button>
   <button type="button" class="codebtn runbtn" id="runbtn">Kör programmet</button>
-  <div class="vyer" role="group" aria-label="Vyer"><span class="extlabel">Vyer</span><button type="button" class="viewtoggle" data-pane="flow" aria-pressed="true">Flöde</button><button type="button" class="viewtoggle" data-pane="class" aria-pressed="true">Klassdiagram</button><button type="button" class="viewtoggle" data-pane="code" aria-pressed="true">Kod</button><button type="button" class="viewtoggle" data-pane="panel" aria-pressed="true">Förklaring</button><button type="button" class="viewtoggle" data-pane="run" aria-pressed="false">Kör</button><button type="button" class="viewtoggle" data-pane="dance" aria-pressed="false">Dance</button><select id="vylayout" aria-label="Färdig layout"><option value="">Layout …</option><option value="alla">Allt sida vid sida</option><option value="schema">Schema och förklaring</option><option value="kod">Flöde, klassdiagram och kod</option><option value="kor">Flöde, kod och körning</option><option value="dance">Dance: flöde, klassdiagram, kod och text</option><option value="aterstall">Återställ allt</option></select></div>
+  <details class="laymenu" id="laymenu"><summary>Layout ▾</summary><div class="laypop"><h4>Färdiga layouter</h4><div class="presets"><button type="button" data-preset="alla"><span class="thumb" style="grid-template-columns: repeat(4, 1fr)" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Allt sida vid sida</button><button type="button" data-preset="2x2"><span class="thumb" style="grid-template-columns: 1.3fr 1fr; grid-template-rows: 1fr 1fr" aria-hidden="true"><i></i><i></i><i></i><i></i></span>2 uppe, 2 nere</button><button type="button" data-preset="3+1"><span class="thumb" style="grid-template-columns: repeat(3, 1fr); grid-template-rows: 1.6fr 1fr" aria-hidden="true"><i></i><i></i><i></i><i style="grid-column: 1 / 4"></i></span>3 uppe, 1 nere</button><button type="button" data-preset="1+3"><span class="thumb" style="grid-template-columns: 1.3fr 1fr; grid-template-rows: repeat(3, 1fr)" aria-hidden="true"><i style="grid-row: 1 / 4"></i><i></i><i></i><i></i></span>1 stor och 3</button><button type="button" data-preset="staplat"><span class="thumb" style="grid-template-rows: repeat(4, 1fr)" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Allt staplat</button><button type="button" data-preset="flikar"><span class="thumb" style="grid-template-columns: 1fr 1fr" aria-hidden="true"><i class="tb"></i><i class="tb"></i></span>Flikar i 2 rutor</button><button type="button" data-preset="kor"><span class="thumb" style="grid-template-columns: 1fr 1fr 1.1fr" aria-hidden="true"><i></i><i></i><i class="run"></i></span>Flöde, kod och körning</button><button type="button" data-preset="schema"><span class="thumb" style="grid-template-columns: 1fr 1fr" aria-hidden="true"><i></i><i></i></span>Schema och förklaring</button></div><h4>Vyer</h4><div class="vyer" role="group" aria-label="Vyer"><button type="button" class="viewtoggle" data-pane="flow" aria-pressed="true">Flöde</button><button type="button" class="viewtoggle" data-pane="class" aria-pressed="true">Klassdiagram</button><button type="button" class="viewtoggle" data-pane="code" aria-pressed="true">Kod</button><button type="button" class="viewtoggle" data-pane="panel" aria-pressed="true">Förklaring</button><button type="button" class="viewtoggle" data-pane="run" aria-pressed="false">Kör</button><button type="button" class="viewtoggle" data-pane="dance" aria-pressed="false">Dance</button></div><p>Eller bygg själv: dra en vy i handtaget ⠿ (eller i dess flik) och släpp den mot en kant av en annan vy, så delas platsen åt det hållet. Släpp i mitten, så hamnar vyerna som flikar på samma plats. Dra i skarvarna åt alla håll för att ändra storlek. Dance och de andra lägena har var sin layout, och valet sparas i webbläsaren.</p><button type="button" class="layreset" data-preset="aterstall">Återställ allt</button></div></details>
   <div class="textsize" role="group" aria-label="Textstorlek"><span class="extlabel">Text</span><button type="button" id="textminus" aria-label="Mindre text">A−</button><span id="textval">115 %</span><button type="button" id="textplus" aria-label="Större text">A+</button></div>
   <div class="nav">
     <button id="prev" type="button">← Föregående</button>
@@ -488,7 +544,7 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
 </header>
 <main id="panes">
   <section class="pane" data-pane="flow" id="pane-flow" aria-label="Flödesschema">
-  <div class="panebar"><span class="panetitle">Flödesschema</span><span class="panectl"><button type="button" data-act="left" title="Flytta åt vänster" aria-label="Flytta Flödesschema åt vänster">◀</button><button type="button" data-act="right" title="Flytta åt höger" aria-label="Flytta Flödesschema åt höger">▶</button><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Flödesschema">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Flödesschema">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Flödesschema">⟲</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Flödesschema">×</button></span></div>
+  <div class="panebar"><button type="button" class="grip" data-act="drag" title="Dra vyn till en annan vy: mot en kant delar platsen, i mitten blir den en flik. Pilarna byter plats med grannen." aria-label="Flytta Flödesschema (dra, eller pilarna)">⠿</button><span class="panetitle">Flödesschema</span><span class="panectl"><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Flödesschema">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Flödesschema">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Flödesschema">⟲</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Flödesschema">×</button></span></div>
   <div class="panebody" id="chart">
     <svg viewBox="0 0 1030 1120" role="group" aria-label="Flödesschema över startkoden med felen utmärkta">
       <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z"/></marker></defs>
@@ -698,7 +754,7 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
   </div>
   </section>
   <section class="pane" data-pane="class" id="pane-class" aria-label="Klassdiagram">
-  <div class="panebar"><span class="panetitle">Klassdiagram</span><span class="panectl"><button type="button" data-act="left" title="Flytta åt vänster" aria-label="Flytta Klassdiagram åt vänster">◀</button><button type="button" data-act="right" title="Flytta åt höger" aria-label="Flytta Klassdiagram åt höger">▶</button><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Klassdiagram">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Klassdiagram">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Klassdiagram">⟲</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Klassdiagram">×</button></span></div>
+  <div class="panebar"><button type="button" class="grip" data-act="drag" title="Dra vyn till en annan vy: mot en kant delar platsen, i mitten blir den en flik. Pilarna byter plats med grannen." aria-label="Flytta Klassdiagram (dra, eller pilarna)">⠿</button><span class="panetitle">Klassdiagram</span><span class="panectl"><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Klassdiagram">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Klassdiagram">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Klassdiagram">⟲</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Klassdiagram">×</button></span></div>
   <div class="panebody" id="classbody">
     <p class="cdhint" id="cdtitle">Klicka på en klass eller en del av den. Problem visar startkoden, Lösning koden nu. Etiketterna är lagren som ändrade delen.</p>
     <svg id="cdsvg" viewBox="0 0 1143 798" role="group" aria-label="Klassdiagram över programmet">
@@ -1071,11 +1127,11 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
   </div>
   </section>
   <section class="pane" data-pane="code" id="pane-code" aria-label="Koden">
-  <div class="panebar"><span class="panetitle">Koden</span><span class="panectl"><button type="button" data-act="left" title="Flytta åt vänster" aria-label="Flytta Koden åt vänster">◀</button><button type="button" data-act="right" title="Flytta åt höger" aria-label="Flytta Koden åt höger">▶</button><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Koden">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Koden">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Koden">⟲</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Koden">×</button></span></div>
+  <div class="panebar"><button type="button" class="grip" data-act="drag" title="Dra vyn till en annan vy: mot en kant delar platsen, i mitten blir den en flik. Pilarna byter plats med grannen." aria-label="Flytta Koden (dra, eller pilarna)">⠿</button><span class="panetitle">Koden</span><span class="panectl"><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Koden">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Koden">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Koden">⟲</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Koden">×</button></span></div>
   <div class="panebody" id="codepane"></div>
   </section>
   <section class="pane" data-pane="run" id="pane-run" aria-label="Kör programmet">
-  <div class="panebar"><span class="panetitle">Kör programmet</span><span class="panectl"><button type="button" data-act="left" title="Flytta åt vänster" aria-label="Flytta Kör programmet åt vänster">◀</button><button type="button" data-act="right" title="Flytta åt höger" aria-label="Flytta Kör programmet åt höger">▶</button><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Kör programmet">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Kör programmet">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Kör programmet">⟲</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Kör programmet">×</button></span></div>
+  <div class="panebar"><button type="button" class="grip" data-act="drag" title="Dra vyn till en annan vy: mot en kant delar platsen, i mitten blir den en flik. Pilarna byter plats med grannen." aria-label="Flytta Kör programmet (dra, eller pilarna)">⠿</button><span class="panetitle">Kör programmet</span><span class="panectl"><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Kör programmet">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Kör programmet">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Kör programmet">⟲</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Kör programmet">×</button></span></div>
   <div class="panebody" id="runpane">
     <p class="runnote">Programmet körs här som en JavaScript-kopia av C#-koden, eftersom en webbsida inte kan köra C#. Kopian gör exakt som C#-programmet: samma meny, samma meddelanden och samma items.txt. Det är testat genom att köra båda med samma inmatning och jämföra. Den riktiga koden körs med <code>dotnet run</code>.</p>
     <div class="runctl"><button type="button" id="runrestart">Starta om</button><button type="button" id="runeof" title="Som Ctrl+Z i konsolen: inmatningen tar slut och Console.ReadLine ger null">Ctrl+Z</button><span class="runstate" id="runstate"></span></div>
@@ -1090,7 +1146,7 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
   </div>
   </section>
   <section class="pane" data-pane="dance" id="pane-dance" aria-label="Dance">
-  <div class="panebar"><span class="panetitle">Dance</span><span class="panectl"><button type="button" data-act="left" title="Flytta åt vänster" aria-label="Flytta Dance åt vänster">◀</button><button type="button" data-act="right" title="Flytta åt höger" aria-label="Flytta Dance åt höger">▶</button><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Dance">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Dance">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Dance">⟲</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Dance">×</button></span></div>
+  <div class="panebar"><button type="button" class="grip" data-act="drag" title="Dra vyn till en annan vy: mot en kant delar platsen, i mitten blir den en flik. Pilarna byter plats med grannen." aria-label="Flytta Dance (dra, eller pilarna)">⠿</button><span class="panetitle">Dance</span><span class="panectl"><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Dance">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Dance">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Dance">⟲</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Dance">×</button></span></div>
   <div class="panebody" id="dancepane">
     <p class="runnote">The Farm Called C-Sharp. Texten lyser i takt med låten. Klicka på en rad för att hoppa dit i låten.</p>
     <div class="hudplayer"><div class="hudreactor" aria-hidden="true"><i class="a"></i><i class="b"></i><i class="c"></i><i class="e"></i><i class="d"></i><i class="f"></i></div><div style="flex: 1; min-width: 0"><div class="hudread"><span><b id="hudbpm">93.7</b></span><span><b>4/4</b></span><span>BPM</span><span>Takt</span></div>
@@ -1100,9 +1156,9 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
   </div>
   </section>
   <section class="pane" data-pane="panel" id="pane-panel" aria-label="Förklaring">
-  <div class="panebar"><span class="panetitle">Förklaring</span><span class="panectl"><button type="button" data-act="left" title="Flytta åt vänster" aria-label="Flytta Förklaring åt vänster">◀</button><button type="button" data-act="right" title="Flytta åt höger" aria-label="Flytta Förklaring åt höger">▶</button><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Förklaring">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Förklaring">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Förklaring">⟲</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Förklaring">×</button></span></div>
+  <div class="panebar"><button type="button" class="grip" data-act="drag" title="Dra vyn till en annan vy: mot en kant delar platsen, i mitten blir den en flik. Pilarna byter plats med grannen." aria-label="Flytta Förklaring (dra, eller pilarna)">⠿</button><span class="panetitle">Förklaring</span><span class="panectl"><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Förklaring">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Förklaring">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Förklaring">⟲</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Förklaring">×</button></span></div>
   <div class="panebody" id="panel" aria-live="polite">
-    <p class="empty">Klicka på en ruta i flödesschemat, en del i klassdiagrammet, en rad i koden eller på Fel 1–6 högst upp.<br>I läget Problem visas felet och startkoden. I läget Lösning visas koden efter lagningen.<br>Vyerna kan flyttas, döljas, göras bredare och zoomas med knapparna i deras list.</p>
+    <p class="empty">Klicka på en ruta i flödesschemat, en del i klassdiagrammet, en rad i koden eller på Fel 1–6 högst upp.<br>I läget Problem visas felet och startkoden. I läget Lösning visas koden efter lagningen.<br>Vyerna kan dras till nya platser i handtaget ⠿ (bredvid, ovanför, under eller som flik), döljas och zoomas. Layout högst upp har färdiga upplägg.</p>
   </div>
   </section>
 </main>
@@ -1684,7 +1740,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
   document.getElementById('prev').addEventListener('click', function () { step(-1); });
   document.getElementById('next').addEventListener('click', function () { step(1); });
   document.addEventListener('keydown', function (e) {
-    if (e.target.closest && e.target.closest('.node, ul.pts li, .cdm, .cdc, .splitter, #runpane')) return;
+    if (e.target.closest && e.target.closest('.node, ul.pts li, .cdm, .cdc, .splitter, .grip, .ptab, #runpane, .laymenu')) return;
     if (e.key === 'ArrowRight') step(1);
     if (e.key === 'ArrowLeft') step(-1);
   });
@@ -2301,7 +2357,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
   function chartTo(el) {
     if (!el) return;
     var pane = el.closest('.pane');
-    if (pane && pane.hidden) { layout.hidden[pane.getAttribute('data-pane')] = false; applyLayout(); }
+    if (pane && !paneOn(pane.getAttribute('data-pane'))) showPane(pane.getAttribute('data-pane'), true, true);
     var body = el.closest('.panebody') || document.getElementById('chart');
     if (body.scrollHeight > body.clientHeight + 1) body.scrollTop += el.getBoundingClientRect().top - body.getBoundingClientRect().top - 8;
     else el.scrollIntoView({ block: 'start' });
@@ -2467,88 +2523,263 @@ if (typeof module !== 'undefined') module.exports = KK2;
     g.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
   });
 
-  // Asked for: the flow chart, the class diagram and the code side by side, and a way to choose
-  // the views: move them, hide them, drag the dividers to change their width, zoom in and out
-  // (the − and + buttons or Ctrl + mouse wheel) and drag the drawings to move around in them.
-  // The choice is kept in this browser; "Återställ allt" brings back the start layout.
-  // Asked for: run the program on the page. Kör programmet (run) is a fifth view, hidden until it is
-  // turned on, and the layout "Flöde, kod och körning" shows it beside the flow chart and the code.
-  // Asked for: a Dance option that plays the song with the lyrics. Dance is a sixth view, hidden
-  // until Dance is chosen, and the layout "Dance" shows it beside the flow chart, the class
-  // diagram and the code.
+  // Asked for: full freedom in how the views are placed, in all directions and in several layers:
+  // all side by side, two above two, three above one, views stacked as tabs. The layout is a tree:
+  // a split (a row or a column) of parts, where each part is a split again or a group of views shown
+  // as tabs. Drag a view by its handle (⠿) or its tab onto another view: near an edge the place is
+  // split in that direction, in the middle the view joins it as a tab. The dividers can be dragged
+  // both ways, the arrow keys on a handle swap the view with its neighbour, and the Layout menu has
+  // ready layouts. Dance and the other choices each keep their own layout, kept in this browser.
   var PANES = ['flow', 'class', 'code', 'panel', 'run', 'dance'];
   var PANE_NAMES = { flow: 'Flödesschema', 'class': 'Klassdiagram', code: 'Koden', panel: 'Förklaring', run: 'Kör programmet', dance: 'Dance' };
-  var PRESETS = {
-    alla: { hidden: { run: true, dance: true }, width: { flow: 32, 'class': 22, code: 24, panel: 22, run: 30, dance: 26 } },
-    schema: { hidden: { 'class': true, code: true, run: true, dance: true }, width: { flow: 50, 'class': 22, code: 24, panel: 50, run: 30, dance: 26 } },
-    kod: { hidden: { panel: true, run: true, dance: true }, width: { flow: 38, 'class': 28, code: 34, panel: 22, run: 30, dance: 26 } },
-    kor: { hidden: { 'class': true, panel: true, dance: true }, width: { flow: 34, 'class': 22, code: 30, panel: 22, run: 36, dance: 26 } },
-    dance: { hidden: { panel: true, run: true }, width: { flow: 28, 'class': 22, code: 24, panel: 22, run: 30, dance: 26 } }
-  };
   var ZOOMS = [0.5, 0.67, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3];
-  function freshLayout(name) {
-    var p = PRESETS[name || 'alla'];
-    return { order: PANES.slice(), hidden: JSON.parse(JSON.stringify(p.hidden)), width: JSON.parse(JSON.stringify(p.width)),
-      zoom: { flow: 1, 'class': 1, code: 1, panel: 1, run: 1, dance: 1 } };
+  // A group with one view, a split (row: side by side, col: above each other) and a group of tabs.
+  function G(p) { return { t: 'g', p: [p], a: p }; }
+  function S(d, c, w) {
+    return { t: 's', d: d, c: c.map(function (x) { return typeof x === 'string' ? G(x) : x; }), w: w || c.map(function () { return 1; }) };
   }
-  var layout = freshLayout();
+  function T() { var ps = [].slice.call(arguments); return { t: 'g', p: ps, a: ps[0] }; }
+  // The ready layouts. In Dance the song takes the class diagram's place, and the class diagram
+  // waits as a tab behind the code.
+  function presetTree(name, dance) {
+    var a = dance ? ['flow', 'dance', 'code', 'panel'] : ['flow', 'class', 'code', 'panel'];
+    var third = function () { return dance ? T('code', 'class') : G('code'); };
+    if (name === 'alla') return S('row', [a[0], a[1], third(), a[3]], [32, 24, 22, 22]);
+    if (name === '2x2') return S('col', [S('row', [a[0], a[1]], [1.35, 1]), S('row', [third(), a[3]])], [1.1, 1]);
+    if (name === '3+1') return S('col', [S('row', [a[0], a[1], third()]), a[3]], [1.7, 1]);
+    if (name === '1+3') return S('row', [a[0], S('col', [a[1], third(), a[3]])], [1.3, 1]);
+    if (name === 'staplat') return S('col', [a[0], a[1], third(), a[3]]);
+    if (name === 'flikar') return S('row', [T(a[0], a[1]), dance ? T('code', 'panel', 'class') : T('code', 'panel')]);
+    if (name === 'kor') return S('row', ['flow', 'code', 'run'], [34, 30, 36]);
+    if (name === 'schema') return S('row', ['flow', 'panel']);
+    return dance ? presetTree('2x2', true) : presetTree('alla', false);
+  }
+  function validTree(n, seen) {
+    seen = seen || {};
+    if (!n || typeof n !== 'object') return false;
+    if (n.t === 'g') {
+      return Array.isArray(n.p) && n.p.length > 0 && n.p.indexOf(n.a) >= 0 &&
+        n.p.every(function (p) { if (PANES.indexOf(p) < 0 || seen[p]) return false; seen[p] = true; return true; });
+    }
+    return n.t === 's' && (n.d === 'row' || n.d === 'col') && Array.isArray(n.c) && n.c.length > 0 && Array.isArray(n.w) &&
+      n.w.length === n.c.length && n.w.every(function (x) { return typeof x === 'number' && x > 0; }) &&
+      n.c.every(function (c) { return validTree(c, seen); });
+  }
+  // After a change: no empty groups, no split with only one part, and a split inside a split of the
+  // same direction is merged into it (its parts keep their share of the room).
+  function tidy(n) {
+    if (!n) return null;
+    if (n.t === 'g') { if (!n.p.length) return null; if (n.p.indexOf(n.a) < 0) n.a = n.p[0]; return n; }
+    var c = [], w = [];
+    n.c.forEach(function (x, i) {
+      var y = tidy(x);
+      if (!y) return;
+      if (y.t === 's' && y.d === n.d) {
+        var sum = y.w.reduce(function (s, v) { return s + v; }, 0);
+        y.c.forEach(function (z, j) { c.push(z); w.push(n.w[i] * y.w[j] / sum); });
+      } else { c.push(y); w.push(n.w[i]); }
+    });
+    if (!c.length) return null;
+    if (c.length === 1) return c[0];
+    n.c = c;
+    n.w = w;
+    return n;
+  }
+  function groupOf(n, p, parent, idx) {
+    if (!n) return null;
+    if (n.t === 'g') return n.p.indexOf(p) >= 0 ? { g: n, parent: parent || null, i: idx } : null;
+    for (var i = 0; i < n.c.length; i++) { var r = groupOf(n.c[i], p, n, i); if (r) return r; }
+    return null;
+  }
+  function panesIn(n) { return !n ? [] : n.t === 'g' ? n.p.slice() : n.c.reduce(function (a, c) { return a.concat(panesIn(c)); }, []); }
+  // inLayout: the view is somewhere in the layout. paneOn: it is also the tab shown in its group.
+  function inLayout(p) { return !!(layout && groupOf(layout.tree, p)); }
+  function paneOn(p) { if (!layout) return true; var r = groupOf(layout.tree, p); return !!(r && r.g.a === p); }
+  function inDanceView() { return document.body.classList.contains('view-dance'); }
+  function setTree(t) {
+    layout.tree = t;
+    if (inDanceView()) layout.dance = t; else layout.normal = t;
+  }
+
+  var layout = { tree: null, normal: presetTree('alla', false), dance: presetTree('2x2', true), zoom: {} };
+  PANES.forEach(function (p) { layout.zoom[p] = 1; });
   try {
-    var saved = JSON.parse(localStorage.getItem('kk2-vyer') || 'null');
-    // A layout saved before the run and Dance views existed keeps its views, and the new views
-    // are put last and hidden.
-    var known = saved && saved.order ? saved.order.filter(function (p, i) { return PANES.indexOf(p) >= 0 && saved.order.indexOf(p) === i; }) : [];
-    if (known.length === (saved && saved.order ? saved.order.length : -1) && ['flow', 'class', 'code', 'panel'].every(function (p) { return known.indexOf(p) >= 0; })) {
-      layout.order = known.concat(PANES.filter(function (p) { return known.indexOf(p) < 0; }));
-      PANES.forEach(function (p) {
-        if (known.indexOf(p) < 0) return;
-        layout.hidden[p] = !!(saved.hidden && saved.hidden[p]);
-        if (saved.width && saved.width[p] > 0) layout.width[p] = saved.width[p];
-        if (saved.zoom && ZOOMS.indexOf(saved.zoom[p]) >= 0) layout.zoom[p] = saved.zoom[p];
-      });
-      // The views as they were before Dance, so leaving Dance after a reload brings them back.
-      if (saved.beforeDance && typeof saved.beforeDance === 'object') {
-        layout.beforeDance = { panel: !!saved.beforeDance.panel, run: !!saved.beforeDance.run };
+    var savedL = JSON.parse(localStorage.getItem('kk2-layout') || 'null');
+    if (savedL) {
+      if (validTree(savedL.normal)) layout.normal = savedL.normal;
+      if (validTree(savedL.dance)) layout.dance = savedL.dance;
+      if (savedL.zoom) PANES.forEach(function (p) { if (ZOOMS.indexOf(savedL.zoom[p]) >= 0) layout.zoom[p] = savedL.zoom[p]; });
+    } else {
+      // A layout saved by the earlier version (one row of views) becomes a row of the new tree.
+      var old = JSON.parse(localStorage.getItem('kk2-vyer') || 'null');
+      if (old && Array.isArray(old.order)) {
+        var vis = old.order.filter(function (p, i) {
+          return PANES.indexOf(p) >= 0 && p !== 'dance' && old.order.indexOf(p) === i && !(old.hidden && old.hidden[p]);
+        });
+        if (vis.length) layout.normal = S('row', vis, vis.map(function (p) { return old.width && old.width[p] > 0 ? old.width[p] : 25; }));
+        if (old.zoom) PANES.forEach(function (p) { if (ZOOMS.indexOf(old.zoom[p]) >= 0) layout.zoom[p] = old.zoom[p]; });
       }
     }
   } catch (e) {}
-  function saveLayout() { try { localStorage.setItem('kk2-vyer', JSON.stringify(layout)); } catch (e) {} }
-  function paneOn(p) { return !layout || !layout.hidden[p]; }
-  function paneEl(p) { return document.getElementById('pane-' + p); }
+  layout.tree = inDanceView() ? layout.dance : layout.normal;
+  function saveLayout() {
+    try { localStorage.setItem('kk2-layout', JSON.stringify({ normal: layout.normal, dance: layout.dance, zoom: layout.zoom })); } catch (e) {}
+  }
+  // Each view's element, found once: while the layout is drawn a view can sit in a part that is
+  // not on the page yet, where looking it up by its id would not find it.
+  var paneEls = {};
+  PANES.forEach(function (p) { paneEls[p] = document.getElementById('pane-' + p); });
+  function paneEl(p) { return paneEls[p]; }
   function flashPane(p) { var el = paneEl(p); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
+
+  // Drawing the tree. Views that are not in the layout wait in a hidden store, so their content and
+  // state stay as they are. A group with several views shows their names as tabs in its bar.
+  var paneStore = document.createElement('div');
+  paneStore.id = 'panestore';
+  paneStore.hidden = true;
+  hub.appendChild(paneStore);
+  var splitRefs = [];
+  function buildNode(n) {
+    var el = document.createElement('div');
+    if (n.t === 'g') {
+      el.className = 'pgroup';
+      el.setAttribute('data-active', n.a);
+      n.p.forEach(function (p) { var s = paneEl(p); s.hidden = p !== n.a; el.appendChild(s); });
+      if (n.p.length > 1) {
+        var tabs = document.createElement('span'), act = paneEl(n.a);
+        tabs.className = 'ptabs';
+        tabs.setAttribute('role', 'tablist');
+        tabs.setAttribute('aria-label', 'Vyer på samma plats');
+        n.p.forEach(function (p) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'ptab';
+          b.setAttribute('role', 'tab');
+          b.setAttribute('aria-selected', String(p === n.a));
+          b.setAttribute('data-tab', p);
+          b.title = p === n.a ? 'Dra fliken för att flytta ' + PANE_NAMES[p] : 'Visa ' + PANE_NAMES[p] + ' (eller dra fliken)';
+          b.textContent = PANE_NAMES[p];
+          tabs.appendChild(b);
+        });
+        act.classList.add('intabs');
+        act.querySelector('.panebar').insertBefore(tabs, act.querySelector('.panectl'));
+      }
+      return el;
+    }
+    el.className = 'psplit ' + n.d;
+    n.c.forEach(function (c, i) {
+      if (i) {
+        var s = document.createElement('div');
+        s.className = 'splitter';
+        s.tabIndex = 0;
+        s.setAttribute('role', 'separator');
+        s.setAttribute('aria-orientation', n.d === 'row' ? 'vertical' : 'horizontal');
+        s.setAttribute('aria-label', n.d === 'row' ? 'Ändra bredden (dra, eller pilarna vänster och höger)' : 'Ändra höjden (dra, eller pilarna upp och ner)');
+        s.setAttribute('data-split', splitRefs.length);
+        splitRefs.push({ n: n, i: i - 1 });
+        el.appendChild(s);
+      }
+      var ch = buildNode(c);
+      ch.style.flex = n.w[i] + ' 1 0px';
+      el.appendChild(ch);
+    });
+    return el;
+  }
   function applyLayout() {
-    if (PANES.every(function (p) { return layout.hidden[p]; })) layout.hidden.panel = false;    // always one view
-    Array.prototype.slice.call(hub.querySelectorAll('.splitter')).forEach(function (s) { hub.removeChild(s); });
-    var vis = layout.order.filter(function (p) { return !layout.hidden[p]; });
-    layout.order.forEach(function (p) {
-      var el = paneEl(p);
-      el.hidden = !!layout.hidden[p];
-      el.style.flex = layout.width[p] + ' 1 0px';
-      hub.appendChild(el);
-    });
-    // A divider between each pair of views that are shown, to drag their widths.
-    vis.forEach(function (p, i) {
-      if (!i) return;
-      var s = document.createElement('div');
-      s.className = 'splitter';
-      s.tabIndex = 0;
-      s.setAttribute('role', 'separator');
-      s.setAttribute('aria-orientation', 'vertical');
-      s.setAttribute('aria-label', 'Ändra bredden mellan ' + PANE_NAMES[vis[i - 1]] + ' och ' + PANE_NAMES[p] + ' (pilarna eller dra)');
-      s.setAttribute('data-left', vis[i - 1]);
-      s.setAttribute('data-right', p);
-      hub.insertBefore(s, paneEl(p));
-    });
-    vis.forEach(function (p, i) {
-      paneEl(p).querySelector('[data-act="left"]').disabled = i === 0;
-      paneEl(p).querySelector('[data-act="right"]').disabled = i === vis.length - 1;
-    });
-    document.querySelectorAll('.viewtoggle').forEach(function (b) { b.setAttribute('aria-pressed', String(!layout.hidden[b.getAttribute('data-pane')])); });
-    document.getElementById('runbtn').classList.toggle('on', !layout.hidden.run);
+    if (!layout.tree) setTree(G('panel'));
+    // Moving the views around must not lose where each one was scrolled to.
+    var keep = PANES.map(function (p) { var b = paneEl(p).querySelector('.panebody'); return [b, b.scrollTop, b.scrollLeft]; });
+    Array.prototype.slice.call(hub.querySelectorAll('.ptabs')).forEach(function (t) { t.parentNode.removeChild(t); });
+    PANES.forEach(function (p) { var el = paneEl(p); el.classList.remove('intabs'); paneStore.appendChild(el); });
+    var old = hub.querySelector('.proot');
+    if (old) hub.removeChild(old);
+    splitRefs = [];
+    var root = buildNode(layout.tree);
+    root.classList.add('proot');
+    hub.insertBefore(root, paneStore);
+    keep.forEach(function (k) { k[0].scrollTop = k[1]; k[0].scrollLeft = k[2]; });
+    document.querySelectorAll('.viewtoggle').forEach(function (b) { b.setAttribute('aria-pressed', String(inLayout(b.getAttribute('data-pane')))); });
+    document.getElementById('runbtn').classList.toggle('on', inLayout('run'));
     PANES.forEach(applyZoom);
     saveLayout();
   }
-  // Zoom: the drawings get wider (and the view scrolls), the code and the explanation get larger.
-  // The middle of what is seen stays in place.
+  function afterShow(p) {
+    if (p === 'code') refreshCode();
+    if (p === 'run') ensureRun();
+  }
+  function activate(p) {
+    var r = groupOf(layout.tree, p);
+    if (!r) return;
+    r.g.a = p;
+    applyLayout();
+    afterShow(p);
+  }
+  // A view that is turned on goes last in the row, or beside the whole layout.
+  function addToTree(p) {
+    var t = layout.tree;
+    if (!t) setTree(G(p));
+    else if (t.t === 's' && t.d === 'row') {
+      t.c.push(G(p));
+      t.w.push(t.w.reduce(function (s, v) { return s + v; }, 0) / t.w.length);
+    } else setTree(S('row', [t, G(p)], [Math.max(2, panesIn(t).length - 1), 1]));
+  }
+  function showPane(p, on, quiet) {
+    // The Dance view belongs to the Dance choice: showing it chooses Dance (whose layout has it),
+    // hiding it stops the song.
+    if (on && p === 'dance' && !inDanceView()) { setView('dance'); return; }
+    var r = groupOf(layout.tree, p);
+    if (on) {
+      if (r) r.g.a = p; else addToTree(p);
+    } else if (r) {
+      r.g.p.splice(r.g.p.indexOf(p), 1);
+      setTree(tidy(layout.tree));
+      if (!layout.tree) setTree(G(p === 'panel' ? 'flow' : 'panel'));    // always at least one view
+    }
+    applyLayout();
+    if (on) { afterShow(p); if (!quiet) flashPane(p); }
+    if (!on && p === 'dance') dancePause();
+  }
+  // Two views change places (the arrow keys on a view's handle).
+  function swapPanes(a, b) {
+    var ra = groupOf(layout.tree, a), rb = groupOf(layout.tree, b);
+    if (!ra || !rb) return;
+    ra.g.p[ra.g.p.indexOf(a)] = b;
+    rb.g.p[rb.g.p.indexOf(b)] = a;
+    if (ra.g === rb.g) ra.g.a = a;
+    else { ra.g.a = b; rb.g.a = a; }
+    applyLayout();
+    flashPane(a);
+  }
+  // Moves view p next to the view target: side is left, right, top or bottom (that place is split)
+  // or center (p joins it as a tab).
+  function dock(p, target, side) {
+    if (p === target) return;
+    var r = groupOf(layout.tree, p);
+    if (r) r.g.p.splice(r.g.p.indexOf(p), 1);
+    setTree(tidy(layout.tree));
+    var t = groupOf(layout.tree, target);
+    if (!t) { showPane(p, true); return; }
+    if (side === 'center') {
+      t.g.p.push(p);
+      t.g.a = p;
+    } else {
+      var dir = side === 'left' || side === 'right' ? 'row' : 'col', before = side === 'left' || side === 'top', ng = G(p);
+      if (t.parent && t.parent.d === dir) {
+        var half = t.parent.w[t.i] / 2, at = before ? t.i : t.i + 1;
+        t.parent.w[t.i] = half;
+        t.parent.c.splice(at, 0, ng);
+        t.parent.w.splice(at, 0, half);
+      } else {
+        var sp = S(dir, before ? [ng, t.g] : [t.g, ng]);
+        if (t.parent) t.parent.c[t.i] = sp; else setTree(sp);
+      }
+    }
+    setTree(tidy(layout.tree));
+    applyLayout();
+    afterShow(p);
+    flashPane(p);
+  }
+
   // Asked for: bigger text. The text size (textScale, chosen at the top, kept in this browser)
   // multiplies every view's own zoom. The bar at the top keeps its size so it does not wrap.
   var TEXT_STEPS = [0.8, 0.9, 1, 1.1, 1.15, 1.25, 1.4, 1.6, 1.8, 2];
@@ -2569,6 +2800,8 @@ if (typeof module !== 'undefined') module.exports = KK2;
   (function () { var h = document.querySelector('header .hint'), t = document.querySelector('header h1'); if (h && t) t.title = h.textContent; })();
   document.getElementById('textminus').addEventListener('click', function () { stepText(-1); });
   document.getElementById('textplus').addEventListener('click', function () { stepText(1); });
+  // Zoom: the drawings get wider (and the view scrolls), the code and the explanation get larger.
+  // The middle of what is seen stays in place.
   function applyZoom(p) {
     var el = paneEl(p), own = layout.zoom[p] || 1, z = own * textScale, body = el.querySelector('.panebody');
     el.querySelector('.zoomval').textContent = Math.round(own * 100) + ' %';
@@ -2590,69 +2823,75 @@ if (typeof module !== 'undefined') module.exports = KK2;
     applyZoom(p);
     saveLayout();
   }
-  function movePane(p, dir) {
-    var vis = layout.order.filter(function (x) { return !layout.hidden[x]; });
-    var other = vis[vis.indexOf(p) + dir];
-    if (!other) return;
-    var a = layout.order.indexOf(p), b = layout.order.indexOf(other);
-    layout.order[a] = other;
-    layout.order[b] = p;
-    applyLayout();
-    var btn = paneEl(p).querySelector('[data-act="' + (dir < 0 ? 'left' : 'right') + '"]');
-    if (btn && !btn.disabled) btn.focus();
-  }
-  function showPane(p, on) {
-    layout.hidden[p] = !on;
-    applyLayout();
-    if (on && p === 'code') refreshCode();
-    if (on && p === 'run') ensureRun();
-    // The Dance view belongs to the Dance choice: showing it chooses Dance, hiding it stops the song.
-    if (on && p === 'dance' && !document.body.classList.contains('view-dance')) setView('dance');
-    if (!on && p === 'dance') dancePause();
-    if (on) flashPane(p);
-  }
-  // The buttons in each view's bar.
+  // The tabs of a group, and the buttons in each view's bar.
   hub.addEventListener('click', function (e) {
+    var tab = e.target.closest('.ptab');
+    if (tab) { activate(tab.getAttribute('data-tab')); return; }
     var b = e.target.closest('.panebar button');
     if (!b) return;
     var p = b.closest('.pane').getAttribute('data-pane'), act = b.getAttribute('data-act');
     if (act === 'zoomin') zoomPane(p, 1);
     else if (act === 'zoomout') zoomPane(p, -1);
     else if (act === 'zoomreset') zoomPane(p, 0);
-    else if (act === 'left') movePane(p, -1);
-    else if (act === 'right') movePane(p, 1);
     else if (act === 'hide') showPane(p, false);
   });
-  // The Vyer buttons at the top: each view on or off, and the ready layouts.
+  // The keyboard way to move a view: the arrow keys on its handle swap it with the view before or
+  // after it.
+  hub.addEventListener('keydown', function (e) {
+    var g = e.target.closest('.panebar .grip');
+    if (!g) return;
+    var dir = { ArrowLeft: -1, ArrowUp: -1, ArrowRight: 1, ArrowDown: 1 }[e.key];
+    if (!dir) return;
+    e.preventDefault();
+    e.stopPropagation();
+    var p = g.closest('.pane').getAttribute('data-pane'), shown = panesIn(layout.tree).filter(paneOn), other = shown[shown.indexOf(p) + dir];
+    if (!other) return;
+    swapPanes(p, other);
+    paneEl(p).querySelector('.grip').focus();
+  });
+  // The Layout menu at the top: the ready layouts, each view on or off, and a reset. It opens under
+  // its button, inside the window, and closes on a click outside it or on Escape.
+  var layMenu = document.getElementById('laymenu'), layPop = layMenu.querySelector('.laypop');
+  layMenu.addEventListener('toggle', function () {
+    if (!layMenu.open) return;
+    var r = layMenu.querySelector('summary').getBoundingClientRect(), w = Math.min(layPop.offsetWidth, innerWidth - 16);
+    layPop.style.left = Math.max(8, Math.min(r.left, innerWidth - w - 8)) + 'px';
+    layPop.style.top = (r.bottom + 6) + 'px';
+  });
+  document.addEventListener('click', function (e) { if (layMenu.open && !layMenu.contains(e.target)) layMenu.open = false; });
+  layMenu.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && layMenu.open) { e.stopPropagation(); layMenu.open = false; layMenu.querySelector('summary').focus(); }
+  });
   document.querySelectorAll('.viewtoggle').forEach(function (b) {
-    b.addEventListener('click', function () { var p = b.getAttribute('data-pane'); showPane(p, !!layout.hidden[p]); });
+    b.addEventListener('click', function () { var p = b.getAttribute('data-pane'); showPane(p, !inLayout(p)); });
   });
-  document.getElementById('vylayout').addEventListener('change', function (e) {
-    var v = e.target.value;
-    e.target.value = '';
-    if (!v) return;
-    var keepZoom = layout.zoom;
-    layout = freshLayout(v === 'aterstall' ? 'alla' : v);
-    if (v !== 'aterstall') layout.zoom = keepZoom;
-    applyLayout();
-    refreshCode();
-    if (!layout.hidden.run) ensureRun();
+  document.querySelectorAll('[data-preset]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var name = b.getAttribute('data-preset');
+      if (name === 'aterstall') { PANES.forEach(function (p) { layout.zoom[p] = 1; }); name = ''; }
+      setTree(presetTree(name, inDanceView()));
+      applyLayout();
+      refreshCode();
+      if (inLayout('run')) ensureRun();
+      layMenu.open = false;
+    });
   });
-  // Dragging a divider (or the arrow keys on it) moves the width between the two views beside it.
+  // Dragging a divider (or the arrow keys on it) moves the room between the two parts beside it:
+  // sideways between parts side by side, up and down between parts above each other.
   hub.addEventListener('pointerdown', function (e) {
     var s = e.target.closest('.splitter');
     if (!s) return;
     e.preventDefault();
-    var L = s.getAttribute('data-left'), R = s.getAttribute('data-right');
-    var lw = paneEl(L).getBoundingClientRect().width, rw = paneEl(R).getBoundingClientRect().width;
-    var sum = layout.width[L] + layout.width[R], x0 = e.clientX;
+    var ref = splitRefs[+s.getAttribute('data-split')], n = ref.n, i = ref.i, row = n.d === 'row';
+    var a = s.previousElementSibling, b = s.nextElementSibling, ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
+    var la = row ? ra.width : ra.height, lb = row ? rb.width : rb.height, sum = n.w[i] + n.w[i + 1], p0 = row ? e.clientX : e.clientY;
     s.classList.add('drag');
     function move(ev) {
-      var nl = Math.max(120, Math.min(lw + rw - 120, lw + ev.clientX - x0));
-      layout.width[L] = sum * nl / (lw + rw);
-      layout.width[R] = sum - layout.width[L];
-      paneEl(L).style.flex = layout.width[L] + ' 1 0px';
-      paneEl(R).style.flex = layout.width[R] + ' 1 0px';
+      var na = Math.max(80, Math.min(la + lb - 80, la + (row ? ev.clientX : ev.clientY) - p0));
+      n.w[i] = sum * na / (la + lb);
+      n.w[i + 1] = sum - n.w[i];
+      a.style.flex = n.w[i] + ' 1 0px';
+      b.style.flex = n.w[i + 1] + ' 1 0px';
     }
     function up() {
       document.removeEventListener('pointermove', move);
@@ -2665,16 +2904,84 @@ if (typeof module !== 'undefined') module.exports = KK2;
   });
   hub.addEventListener('keydown', function (e) {
     var s = e.target.closest('.splitter');
-    if (!s || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
+    if (!s) return;
+    var ref = splitRefs[+s.getAttribute('data-split')], n = ref.n, i = ref.i;
+    var k = (n.d === 'row' ? ['ArrowLeft', 'ArrowRight'] : ['ArrowUp', 'ArrowDown']).indexOf(e.key);
+    if (k < 0) return;
     e.preventDefault();
     e.stopPropagation();
-    var L = s.getAttribute('data-left'), R = s.getAttribute('data-right'), sum = layout.width[L] + layout.width[R];
-    var d = (e.key === 'ArrowLeft' ? -1 : 1) * sum * 0.05;
-    layout.width[L] = Math.max(sum * 0.15, Math.min(sum * 0.85, layout.width[L] + d));
-    layout.width[R] = sum - layout.width[L];
-    paneEl(L).style.flex = layout.width[L] + ' 1 0px';
-    paneEl(R).style.flex = layout.width[R] + ' 1 0px';
+    var sum = n.w[i] + n.w[i + 1];
+    n.w[i] = Math.max(sum * 0.15, Math.min(sum * 0.85, n.w[i] + (k ? 1 : -1) * sum * 0.05));
+    n.w[i + 1] = sum - n.w[i];
+    s.previousElementSibling.style.flex = n.w[i] + ' 1 0px';
+    s.nextElementSibling.style.flex = n.w[i + 1] + ' 1 0px';
     saveLayout();
+  });
+  // Dragging a view by its handle (⠿) or its tab: a frame shows where it will land, Escape cancels.
+  var dockHint = document.createElement('div'), dragGhost = document.createElement('div');
+  dockHint.className = 'dockhint';
+  dragGhost.className = 'dragghost';
+  dockHint.hidden = dragGhost.hidden = true;
+  document.body.appendChild(dockHint);
+  document.body.appendChild(dragGhost);
+  hub.addEventListener('pointerdown', function (e) {
+    var grip = e.target.closest('.panebar .grip, .ptab');
+    if (!grip || e.button !== 0) return;
+    var p = grip.getAttribute('data-tab') || grip.closest('.pane').getAttribute('data-pane');
+    var x0 = e.clientX, y0 = e.clientY, dragging = false, drop = null;
+    function zoneAt(x, y) {
+      var el = document.elementFromPoint(x, y), g = el && el.closest('.pgroup');
+      if (!g || !hub.contains(g)) return null;
+      var r = g.getBoundingClientRect(), fx = (x - r.left) / r.width, fy = (y - r.top) / r.height, side;
+      var target = g.getAttribute('data-active');
+      if (target === p) {
+        var own = groupOf(layout.tree, p);
+        if (!own || own.g.p.length < 2) return null;        // its own place: nothing to do
+        target = own.g.p.filter(function (x) { return x !== p; })[0];
+      }
+      if (el.closest('.ptabs') || (fx > 0.3 && fx < 0.7 && fy > 0.3 && fy < 0.7)) side = 'center';
+      else {
+        var d = { left: fx, right: 1 - fx, top: fy, bottom: 1 - fy };
+        side = Object.keys(d).sort(function (m, n) { return d[m] - d[n]; })[0];
+      }
+      var h = { left: r.left, top: r.top, width: r.width, height: r.height };
+      if (side === 'left' || side === 'right') { h.width = r.width / 2; if (side === 'right') h.left = r.left + r.width / 2; }
+      if (side === 'top' || side === 'bottom') { h.height = r.height / 2; if (side === 'bottom') h.top = r.top + r.height / 2; }
+      return { target: target, side: side, rect: h };
+    }
+    function move(ev) {
+      if (!dragging) {
+        if (Math.abs(ev.clientX - x0) + Math.abs(ev.clientY - y0) < 8) return;
+        dragging = true;
+        dragGhost.textContent = '⠿ ' + PANE_NAMES[p];
+        dragGhost.hidden = false;
+        document.body.classList.add('docking');
+      }
+      dragGhost.style.left = (ev.clientX + 14) + 'px';
+      dragGhost.style.top = (ev.clientY + 14) + 'px';
+      drop = zoneAt(ev.clientX, ev.clientY);
+      dockHint.hidden = !drop;
+      if (drop) {
+        dockHint.style.left = drop.rect.left + 'px';
+        dockHint.style.top = drop.rect.top + 'px';
+        dockHint.style.width = drop.rect.width + 'px';
+        dockHint.style.height = drop.rect.height + 'px';
+        dockHint.textContent = drop.side === 'center' ? 'Som flik här' : { left: 'Till vänster', right: 'Till höger', top: 'Ovanför', bottom: 'Under' }[drop.side];
+      }
+    }
+    function end(apply) {
+      document.removeEventListener('pointermove', move);
+      document.removeEventListener('pointerup', up);
+      document.removeEventListener('keydown', key, true);
+      dockHint.hidden = dragGhost.hidden = true;
+      document.body.classList.remove('docking');
+      if (apply && dragging && drop) dock(p, drop.target, drop.side);
+    }
+    function up() { end(true); }
+    function key(ev) { if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); end(false); } }
+    document.addEventListener('pointermove', move);
+    document.addEventListener('pointerup', up);
+    document.addEventListener('keydown', key, true);
   });
   // Dragging the background of the flow chart or the class diagram moves around in it (useful
   // when zoomed in). A drag of a few pixels does not count, so a click still opens a box.
@@ -2886,7 +3193,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
   term.addEventListener('click', function () { runFocus = true; if (!runIn.disabled && !getSelection().toString()) runIn.focus(); });
   document.getElementById('runbtn').addEventListener('click', function () {
     runFocus = true;
-    if (layout.hidden.run) showPane('run', true);
+    if (!paneOn('run')) showPane('run', true);
     else { flashPane('run'); ensureRun(); }
     if (!runIn.disabled) runIn.focus();
   });
@@ -3119,7 +3426,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
   });
   function dancePlay() {
     if (!layout) return;
-    if (layout.hidden.dance) { layout.hidden.dance = false; applyLayout(); }
+    if (!inLayout('dance')) showPane('dance', true, true);
     var p = dAudio.play();
     if (p && p.catch) p.catch(function (e) { if (e && e.name === 'NotAllowedError') danceAskToStart(); });
     return p;
@@ -3142,38 +3449,32 @@ if (typeof module !== 'undefined') module.exports = KK2;
     document.addEventListener('keydown', go, true);
   }
   function dancePause() { if (!dAudio.paused) dAudio.pause(); }
-  // Choosing Dance shows the Dance view beside the flow chart, the class diagram and the code (the
-  // explanation and the run view step aside); leaving Dance stops the song and brings the views
-  // back as they were.
+  // Choosing Dance switches to the Dance layout (with the Dance view in it); leaving Dance stops the
+  // song and switches back to the layout of Problem and Lösning, which has no Dance view.
   function danceViewChanged(on) {
     if (!layout) return;
-    if (on && !layout.beforeDance) {
-      layout.beforeDance = { panel: !!layout.hidden.panel, run: !!layout.hidden.run };
-      layout.hidden.panel = true;
-      layout.hidden.run = true;
-      layout.hidden.dance = false;
-      applyLayout();
-    } else if (on && layout.hidden.dance) {
-      layout.hidden.dance = false;
-      applyLayout();
-    }
+    var want = on ? layout.dance : layout.normal, changed = layout.tree !== want;
+    layout.tree = want;
+    if (on && !inLayout('dance')) { addToTree('dance'); changed = true; }
     if (!on) {
       dancePause();
-      if (layout.beforeDance) {
-        layout.hidden.panel = layout.beforeDance.panel;
-        layout.hidden.run = layout.beforeDance.run;
-        delete layout.beforeDance;
+      var r = groupOf(layout.tree, 'dance');
+      if (r) {
+        r.g.p.splice(r.g.p.indexOf('dance'), 1);
+        setTree(tidy(layout.tree) || presetTree('alla', false));
+        changed = true;
       }
-      layout.hidden.dance = true;
+    }
+    if (changed) {
       applyLayout();
-      if (!layout.hidden.run) ensureRun();
+      if (!on && inLayout('run')) ensureRun();
     }
   }
 
   applyLayout();
   applyText();
   refreshCode();
-  if (!layout.hidden.run) ensureRun();
+  if (inLayout('run')) ensureRun();
   danceViewChanged(document.body.classList.contains('view-dance'));
   hudRun();
   if (document.body.classList.contains('view-dance')) dancePlay();
