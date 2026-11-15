@@ -163,7 +163,18 @@ body.view-fix .vstart, body.view-bug .vnow { display: none; }
 #runfiletext { font: 13px/1.45 Consolas, "Cascadia Mono", Menlo, monospace; color: var(--text); background: var(--code-bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px; min-height: 110px; resize: vertical; }
 #runfiletext:disabled { opacity: .55; }
 #dancepane { padding: 10px 14px 45vh; }
-#danceaudio { width: 100%; margin: 6px 0 4px; }
+.hudplayer { display: none; align-items: center; gap: 10px; margin-left: auto; }
+body.view-dance .hudplayer { display: flex; }
+.hudplayer .hudreactor { transform: scale(.43); margin: -32px; }
+.hudplayer .beatbar { margin: 0; }
+#danceaudio { width: 300px; max-width: 34vw; height: 34px; margin: 0; }
+.fullbtn { white-space: nowrap; }
+body.nofull .fullbtn { display: none; }
+.pane.maxed { position: fixed !important; inset: 0; z-index: 80; margin: 0 !important; background-color: var(--bg); }
+body.maxing #panes { z-index: 90 !important; }
+.pane:fullscreen { width: 100%; height: 100%; margin: 0 !important; background-color: var(--bg); }
+.pane:fullscreen::backdrop { background: #02070e; }
+.panectl [data-act="full"].on { color: var(--accent); }
 .viewbtn[data-view="dance"][aria-pressed="true"] { background: var(--mark); }
 .lysec { margin: 16px 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
 .lyline { padding: 3px 8px; margin: 1px 0; border-radius: 6px; cursor: pointer; color: var(--muted); line-height: 1.5; transition: background .25s, color .25s; }
@@ -306,6 +317,9 @@ body.view-dance .pbeats { display: flex; }
 .viewtoggle[aria-pressed="false"] { color: var(--muted); text-decoration: line-through; }
 .proot { flex: 1; }
 .psplit, .pgroup { display: flex; min-width: 0; min-height: 0; }
+.pgroup { position: relative; }
+.corner { position: absolute; right: -8px; bottom: -8px; z-index: 6; width: 16px; height: 16px; border-radius: 3px; background: var(--accent); opacity: .55; cursor: nwse-resize; touch-action: none; }
+.corner:hover, .corner.drag, .corner:focus-visible { opacity: 1; outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
 .psplit.row { flex-direction: row; }
 .psplit.col, .pgroup { flex-direction: column; }
 .pgroup > .pane { flex: 1 1 0px; }
@@ -417,7 +431,7 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
   body { display: block; }
   main { flex-direction: column; height: auto; }
   .pane { flex: none !important; border-right: 0; border-bottom: 1px solid var(--line); }
-  .splitter { display: none; }
+  .splitter, .corner { display: none; }
   .psplit.row, .psplit.col { flex-direction: column; }
   .psplit > *, .pgroup > .pane { flex: none !important; }
   #buildpane { flex: none; height: 85vh; }
@@ -529,11 +543,11 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
 :root[data-theme="dark"] body .lyline.now code { background: var(--accent); color: var(--bg); text-shadow: none; box-shadow: 0 0 14px var(--accent); }
 :root[data-theme="dark"] body .lyline.now code .w, :root[data-theme="dark"] body .lyline.now code .w.done, :root[data-theme="dark"] body .lyline.now code .w.on { color: var(--bg); border-bottom: 0; }
 /* The four beat marks as diamonds: green on each beat, purple on beat 1, as before */
-:root[data-theme="dark"] body .beatbar { gap: 12px; height: 26px; }
+:root[data-theme="dark"] body .beatbar { gap: 10px; height: 26px; }
 :root[data-theme="dark"] body .beatbar span { width: 13px; height: 13px; border-radius: 0; transform: rotate(45deg); background: transparent; border: 1px solid rgba(98, 243, 255, .45); }
 :root[data-theme="dark"] body .beatbar span.on { background: var(--ok); border-color: var(--ok); box-shadow: 0 0 14px var(--ok); transform: rotate(45deg) scale(1.3); }
 :root[data-theme="dark"] body .beatbar span.on:first-child { background: var(--mark); border-color: var(--mark); box-shadow: 0 0 18px var(--mark); transform: rotate(45deg) scale(1.55); }
-:root[data-theme="dark"] body #danceaudio { filter: drop-shadow(0 0 8px rgba(98, 243, 255, .35)); margin-top: 8px; }
+:root[data-theme="dark"] body #danceaudio { filter: drop-shadow(0 0 8px rgba(98, 243, 255, .35)); }
 
 /* Arc reactor beside the player: rings that spin, a core that flashes on every beat */
 .hudreactor { position: relative; width: 112px; height: 112px; flex: none; }
@@ -555,10 +569,10 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
 @keyframes hudbeat { 0% { transform: scale(1.08); filter: brightness(1.5); } 100% { transform: scale(1); } }
 @keyframes hudshock { 0% { transform: scale(1); opacity: .9; } 100% { transform: scale(2); opacity: 0; } }
 @keyframes hudcore { 0% { filter: brightness(1.7); } 100% { filter: brightness(1); } }
-.hudplayer { display: flex; align-items: center; gap: 14px; position: sticky; top: -10px; z-index: 3; padding: 8px 0; margin: -10px 0 0;
-  background: linear-gradient(rgba(3, 18, 30, .96) 80%, rgba(3, 18, 30, 0)); }
-.hudread { display: grid; grid-template-columns: auto auto; justify-content: start; gap: 2px 14px; font-size: 12px; letter-spacing: .2em; color: var(--muted); text-transform: uppercase; }
-.hudread b { font: 700 20px "Cascadia Mono", Consolas, monospace; letter-spacing: 0; color: #62f3ff; text-shadow: 0 0 10px #62f3ff; }
+/* The player in the top bar (asked for: the play button and the circle up above, away from the lyrics) */
+:root[data-theme="dark"] body .hudplayer { padding: 0 6px; border-left: 1px solid var(--hud-dim); }
+.hudread { display: grid; grid-template-columns: auto auto; justify-content: start; gap: 0 10px; font-size: 10.5px; letter-spacing: .2em; color: var(--muted); text-transform: uppercase; }
+.hudread b { font: 700 16px "Cascadia Mono", Consolas, monospace; letter-spacing: 0; color: #62f3ff; text-shadow: 0 0 10px #62f3ff; }
 #hudnet { position: fixed; inset: 0; z-index: 0; pointer-events: none; display: none; }
 .hudflash { position: fixed; inset: 0; z-index: 0; pointer-events: none; display: none; opacity: 0; background: radial-gradient(circle at 70% 40%, rgba(98, 243, 255, .12), transparent 55%); }
 :root[data-theme="dark"] body #hudnet, :root[data-theme="dark"] body.view-dance .hudflash { display: block; }
@@ -630,6 +644,11 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
 :root[data-theme="dark"] body .laymenu[open] > summary { box-shadow: inset 0 0 14px rgba(98, 243, 255, .45); }
 :root[data-theme="dark"] body .laypop { clip-path: none; }
 
+/* The corner square that changes width and height at once, and a view in full screen */
+:root[data-theme="dark"] body .corner { background: var(--hud); border-radius: 0; transform: rotate(45deg) scale(.8); box-shadow: 0 0 10px var(--hud); opacity: .6; }
+:root[data-theme="dark"] body .corner:hover, :root[data-theme="dark"] body .corner.drag, :root[data-theme="dark"] body .corner:focus-visible { opacity: 1; box-shadow: 0 0 18px var(--hud); }
+:root[data-theme="dark"] body .pane:fullscreen, :root[data-theme="dark"] body .pane.maxed { background-color: #03111e; margin: 0; clip-path: none; }
+
 </style>
 </head>
 <body>
@@ -646,18 +665,20 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
   <button type="button" class="codebtn" id="codebtn">Hela koden</button>
   <button type="button" class="codebtn" id="cdbtn">Klassdiagram</button>
   <button type="button" class="codebtn runbtn" id="runbtn">Kör programmet</button>
-  <details class="laymenu" id="laymenu"><summary>Layout ▾</summary><div class="laypop"><h4>Färdiga layouter</h4><div class="presets"><button type="button" data-preset="alla"><span class="thumb" style="grid-template-columns: repeat(4, 1fr)" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Allt sida vid sida</button><button type="button" data-preset="2x2"><span class="thumb" style="grid-template-columns: 1.3fr 1fr; grid-template-rows: 1fr 1fr" aria-hidden="true"><i></i><i></i><i></i><i></i></span>2 uppe, 2 nere</button><button type="button" data-preset="3+1"><span class="thumb" style="grid-template-columns: repeat(3, 1fr); grid-template-rows: 1.6fr 1fr" aria-hidden="true"><i></i><i></i><i></i><i style="grid-column: 1 / 4"></i></span>3 uppe, 1 nere</button><button type="button" data-preset="1+3"><span class="thumb" style="grid-template-columns: 1.3fr 1fr; grid-template-rows: repeat(3, 1fr)" aria-hidden="true"><i style="grid-row: 1 / 4"></i><i></i><i></i><i></i></span>1 stor och 3</button><button type="button" data-preset="2+2+2"><span class="thumb" style="grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr)" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>2 uppe, 2 nere, 2 längst ner</button><button type="button" data-preset="sex"><span class="thumb" style="grid-template-columns: repeat(6, 1fr)" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>6 sida vid sida</button><button type="button" data-preset="staplat"><span class="thumb" style="grid-template-rows: repeat(4, 1fr)" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Allt staplat</button><button type="button" data-preset="flikar"><span class="thumb" style="grid-template-columns: 1fr 1fr" aria-hidden="true"><i class="tb"></i><i class="tb"></i></span>Flikar i 2 rutor</button><button type="button" data-preset="kor"><span class="thumb" style="grid-template-columns: 1fr 1fr 1.1fr" aria-hidden="true"><i></i><i></i><i class="run"></i></span>Flöde, kod och körning</button><button type="button" data-preset="schema"><span class="thumb" style="grid-template-columns: 1fr 1fr" aria-hidden="true"><i></i><i></i></span>Schema och förklaring</button></div><h4>Vyer</h4><div class="vyer" role="group" aria-label="Vyer"><button type="button" class="viewtoggle" data-pane="flow" aria-pressed="true">Flöde</button><button type="button" class="viewtoggle" data-pane="class" aria-pressed="true">Klassdiagram</button><button type="button" class="viewtoggle" data-pane="code" aria-pressed="true">Kod</button><button type="button" class="viewtoggle" data-pane="panel" aria-pressed="true">Förklaring</button><button type="button" class="viewtoggle" data-pane="run" aria-pressed="false">Kör</button><button type="button" class="viewtoggle" data-pane="dance" aria-pressed="false">Dance</button><button type="button" class="viewtoggle" data-pane="build" aria-pressed="false">Bygget</button></div><p>Eller bygg själv: dra en vy i handtaget ⠿ (eller i dess flik) och släpp den mot en kant av en annan vy, så delas platsen åt det hållet. Släpp i mitten, så hamnar vyerna som flikar på samma plats. Dra i skarvarna åt alla håll för att ändra storlek. Dance och de andra lägena har var sin layout, och valet sparas i webbläsaren.</p><button type="button" class="layreset" data-preset="aterstall">Återställ allt</button></div></details>
+  <details class="laymenu" id="laymenu"><summary>Layout ▾</summary><div class="laypop"><h4>Färdiga layouter</h4><div class="presets"><button type="button" data-preset="alla"><span class="thumb" style="grid-template-columns: repeat(4, 1fr)" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Allt sida vid sida</button><button type="button" data-preset="2x2"><span class="thumb" style="grid-template-columns: 1.3fr 1fr; grid-template-rows: 1fr 1fr" aria-hidden="true"><i></i><i></i><i></i><i></i></span>2 uppe, 2 nere</button><button type="button" data-preset="3+1"><span class="thumb" style="grid-template-columns: repeat(3, 1fr); grid-template-rows: 1.6fr 1fr" aria-hidden="true"><i></i><i></i><i></i><i style="grid-column: 1 / 4"></i></span>3 uppe, 1 nere</button><button type="button" data-preset="1+3"><span class="thumb" style="grid-template-columns: 1.3fr 1fr; grid-template-rows: repeat(3, 1fr)" aria-hidden="true"><i style="grid-row: 1 / 4"></i><i></i><i></i><i></i></span>1 stor och 3</button><button type="button" data-preset="2+2+2"><span class="thumb" style="grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr)" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>2 uppe, 2 nere, 2 längst ner</button><button type="button" data-preset="sex"><span class="thumb" style="grid-template-columns: repeat(6, 1fr)" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>6 sida vid sida</button><button type="button" data-preset="alla7"><span class="thumb" style="grid-template-columns: repeat(12, 1fr); grid-template-rows: 1fr 1fr" aria-hidden="true"><i style="grid-column: span 3"></i><i style="grid-column: span 3"></i><i style="grid-column: span 3"></i><i style="grid-column: span 3"></i><i style="grid-column: span 4"></i><i style="grid-column: span 4"></i><i style="grid-column: span 4"></i></span>Alla vyer</button><button type="button" data-preset="staplat"><span class="thumb" style="grid-template-rows: repeat(4, 1fr)" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Allt staplat</button><button type="button" data-preset="flikar"><span class="thumb" style="grid-template-columns: 1fr 1fr" aria-hidden="true"><i class="tb"></i><i class="tb"></i></span>Flikar i 2 rutor</button><button type="button" data-preset="kor"><span class="thumb" style="grid-template-columns: 1fr 1fr 1.1fr" aria-hidden="true"><i></i><i></i><i class="run"></i></span>Flöde, kod och körning</button><button type="button" data-preset="schema"><span class="thumb" style="grid-template-columns: 1fr 1fr" aria-hidden="true"><i></i><i></i></span>Schema och förklaring</button></div><h4>Vyer</h4><div class="vyer" role="group" aria-label="Vyer"><button type="button" class="viewtoggle" data-pane="flow" aria-pressed="true">Flöde</button><button type="button" class="viewtoggle" data-pane="class" aria-pressed="true">Klassdiagram</button><button type="button" class="viewtoggle" data-pane="code" aria-pressed="true">Kod</button><button type="button" class="viewtoggle" data-pane="panel" aria-pressed="true">Förklaring</button><button type="button" class="viewtoggle" data-pane="run" aria-pressed="false">Kör</button><button type="button" class="viewtoggle" data-pane="dance" aria-pressed="false">Lyrics</button><button type="button" class="viewtoggle" data-pane="build" aria-pressed="false">Bygget</button></div><p>Eller bygg själv: dra en vy i handtaget ⠿ (eller i dess flik) och släpp den mot en kant av en annan vy, så delas platsen åt det hållet. Släpp i mitten, så hamnar vyerna som flikar på samma plats. Dra i skarvarna åt alla håll för att ändra storlek, eller i fyrkanten där två skarvar möts för att ändra bredd och höjd samtidigt. Dance och de andra lägena har var sin layout, och valet sparas i webbläsaren.</p><button type="button" class="layreset" data-preset="aterstall">Återställ allt</button></div></details>
   <div class="textsize" role="group" aria-label="Textstorlek"><span class="extlabel">Text</span><button type="button" id="textminus" aria-label="Mindre text">A−</button><span id="textval">115 %</span><button type="button" id="textplus" aria-label="Större text">A+</button></div>
+  <button type="button" class="fullbtn" id="fullbtn" aria-pressed="false" title="Hela sidan i helskärm (Esc avslutar)">⛶ Helskärm</button>
   <div class="nav">
     <button id="prev" type="button">← Föregående</button>
     <span class="pos" id="pos"></span>
     <button id="next" type="button">Nästa →</button>
     <button id="theme" type="button">Ljust/mörkt</button>
   </div>
+  <div class="hudplayer" id="hudplayer" role="group" aria-label="Låten"><div class="hudreactor" aria-hidden="true"><i class="a"></i><i class="b"></i><i class="c"></i><i class="e"></i><i class="d"></i><i class="f"></i></div><div class="hudread"><span><b id="hudbpm">93.7</b></span><span><b>4/4</b></span><span>BPM</span><span>Takt</span></div><audio id="danceaudio" controls preload="metadata" src="ljud/the-farm-called-c-sharp.mp3"></audio><div class="beatbar" id="beatbar" aria-hidden="true"><span></span><span></span><span></span><span></span></div></div>
 </header>
 <main id="panes">
   <section class="pane" data-pane="flow" id="pane-flow" aria-label="Flödesschema">
-  <div class="panebar"><button type="button" class="grip" data-act="drag" title="Dra vyn till en annan vy: mot en kant delar platsen, i mitten blir den en flik. Pilarna byter plats med grannen." aria-label="Flytta Flödesschema (dra, eller pilarna)">⠿</button><span class="panetitle">Flödesschema</span><span class="panectl"><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Flödesschema">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Flödesschema">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Flödesschema">⟲</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Flödesschema">×</button></span></div>
+  <div class="panebar"><button type="button" class="grip" data-act="drag" title="Dra vyn till en annan vy: mot en kant delar platsen, i mitten blir den en flik. Pilarna byter plats med grannen." aria-label="Flytta Flödesschema (dra, eller pilarna)">⠿</button><span class="panetitle">Flödesschema</span><span class="panectl"><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Flödesschema">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Flödesschema">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Flödesschema">⟲</button><button type="button" data-act="full" title="Vyn i helskärm (Esc avslutar)" aria-label="Flödesschema i helskärm">⛶</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Flödesschema">×</button></span></div>
   <div class="panebody" id="chart">
     <svg viewBox="0 0 1030 1120" role="group" aria-label="Flödesschema över startkoden med felen utmärkta">
       <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z"/></marker></defs>
@@ -867,7 +888,7 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
   </div>
   </section>
   <section class="pane" data-pane="class" id="pane-class" aria-label="Klassdiagram">
-  <div class="panebar"><button type="button" class="grip" data-act="drag" title="Dra vyn till en annan vy: mot en kant delar platsen, i mitten blir den en flik. Pilarna byter plats med grannen." aria-label="Flytta Klassdiagram (dra, eller pilarna)">⠿</button><span class="panetitle">Klassdiagram</span><span class="panectl"><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Klassdiagram">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Klassdiagram">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Klassdiagram">⟲</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Klassdiagram">×</button></span></div>
+  <div class="panebar"><button type="button" class="grip" data-act="drag" title="Dra vyn till en annan vy: mot en kant delar platsen, i mitten blir den en flik. Pilarna byter plats med grannen." aria-label="Flytta Klassdiagram (dra, eller pilarna)">⠿</button><span class="panetitle">Klassdiagram</span><span class="panectl"><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Klassdiagram">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Klassdiagram">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Klassdiagram">⟲</button><button type="button" data-act="full" title="Vyn i helskärm (Esc avslutar)" aria-label="Klassdiagram i helskärm">⛶</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Klassdiagram">×</button></span></div>
   <div class="panebody" id="classbody">
     <p class="cdhint" id="cdtitle">Klicka på en klass eller en del av den. Problem visar startkoden, Lösning koden nu. Etiketterna är lagren som ändrade delen.</p>
     <svg id="cdsvg" viewBox="0 0 1143 798" role="group" aria-label="Klassdiagram över programmet">
@@ -1240,11 +1261,11 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
   </div>
   </section>
   <section class="pane" data-pane="code" id="pane-code" aria-label="Koden">
-  <div class="panebar"><button type="button" class="grip" data-act="drag" title="Dra vyn till en annan vy: mot en kant delar platsen, i mitten blir den en flik. Pilarna byter plats med grannen." aria-label="Flytta Koden (dra, eller pilarna)">⠿</button><span class="panetitle">Koden</span><span class="panectl"><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Koden">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Koden">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Koden">⟲</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Koden">×</button></span></div>
+  <div class="panebar"><button type="button" class="grip" data-act="drag" title="Dra vyn till en annan vy: mot en kant delar platsen, i mitten blir den en flik. Pilarna byter plats med grannen." aria-label="Flytta Koden (dra, eller pilarna)">⠿</button><span class="panetitle">Koden</span><span class="panectl"><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Koden">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Koden">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Koden">⟲</button><button type="button" data-act="full" title="Vyn i helskärm (Esc avslutar)" aria-label="Koden i helskärm">⛶</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Koden">×</button></span></div>
   <div class="panebody" id="codepane"></div>
   </section>
   <section class="pane" data-pane="run" id="pane-run" aria-label="Kör programmet">
-  <div class="panebar"><button type="button" class="grip" data-act="drag" title="Dra vyn till en annan vy: mot en kant delar platsen, i mitten blir den en flik. Pilarna byter plats med grannen." aria-label="Flytta Kör programmet (dra, eller pilarna)">⠿</button><span class="panetitle">Kör programmet</span><span class="panectl"><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Kör programmet">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Kör programmet">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Kör programmet">⟲</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Kör programmet">×</button></span></div>
+  <div class="panebar"><button type="button" class="grip" data-act="drag" title="Dra vyn till en annan vy: mot en kant delar platsen, i mitten blir den en flik. Pilarna byter plats med grannen." aria-label="Flytta Kör programmet (dra, eller pilarna)">⠿</button><span class="panetitle">Kör programmet</span><span class="panectl"><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Kör programmet">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Kör programmet">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Kör programmet">⟲</button><button type="button" data-act="full" title="Vyn i helskärm (Esc avslutar)" aria-label="Kör programmet i helskärm">⛶</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Kör programmet">×</button></span></div>
   <div class="panebody" id="runpane">
     <p class="runnote">Programmet körs här som en JavaScript-kopia av C#-koden, eftersom en webbsida inte kan köra C#. Kopian gör exakt som C#-programmet: samma meny, samma meddelanden och samma items.txt. Det är testat genom att köra båda med samma inmatning och jämföra. Den riktiga koden körs med <code>dotnet run</code>.</p>
     <div class="runctl"><button type="button" id="runrestart">Starta om</button><button type="button" id="runeof" title="Som Ctrl+Z i konsolen: inmatningen tar slut och Console.ReadLine ger null">Ctrl+Z</button><span class="runstate" id="runstate"></span></div>
@@ -1259,7 +1280,7 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
   </div>
   </section>
   <section class="pane" data-pane="build" id="pane-build" aria-label="Bygget">
-  <div class="panebar"><button type="button" class="grip" data-act="drag" title="Dra vyn till en annan vy: mot en kant delar platsen, i mitten blir den en flik. Pilarna byter plats med grannen." aria-label="Flytta Bygget (dra, eller pilarna)">⠿</button><span class="panetitle">Bygget</span><span class="panectl"><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Bygget">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Bygget">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Bygget">⟲</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Bygget">×</button></span></div>
+  <div class="panebar"><button type="button" class="grip" data-act="drag" title="Dra vyn till en annan vy: mot en kant delar platsen, i mitten blir den en flik. Pilarna byter plats med grannen." aria-label="Flytta Bygget (dra, eller pilarna)">⠿</button><span class="panetitle">Bygget</span><span class="panectl"><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Bygget">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Bygget">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Bygget">⟲</button><button type="button" data-act="full" title="Vyn i helskärm (Esc avslutar)" aria-label="Bygget i helskärm">⛶</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Bygget">×</button></span></div>
   <div class="panebody" id="buildpane">
     <div class="bvs">
       <div class="bvs-top"><span class="bvs-lyric" id="bvslyric">♪</span><span class="bvs-prog" id="bvsprog"></span></div>
@@ -1274,18 +1295,15 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
     </div>
   </div>
   </section>
-  <section class="pane" data-pane="dance" id="pane-dance" aria-label="Dance">
-  <div class="panebar"><button type="button" class="grip" data-act="drag" title="Dra vyn till en annan vy: mot en kant delar platsen, i mitten blir den en flik. Pilarna byter plats med grannen." aria-label="Flytta Dance (dra, eller pilarna)">⠿</button><span class="panetitle">Dance</span><span class="panectl"><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Dance">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Dance">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Dance">⟲</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Dance">×</button></span></div>
+  <section class="pane" data-pane="dance" id="pane-dance" aria-label="Lyrics">
+  <div class="panebar"><button type="button" class="grip" data-act="drag" title="Dra vyn till en annan vy: mot en kant delar platsen, i mitten blir den en flik. Pilarna byter plats med grannen." aria-label="Flytta Lyrics (dra, eller pilarna)">⠿</button><span class="panetitle">Lyrics</span><span class="panectl"><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Lyrics">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Lyrics">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Lyrics">⟲</button><button type="button" data-act="full" title="Vyn i helskärm (Esc avslutar)" aria-label="Lyrics i helskärm">⛶</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Lyrics">×</button></span></div>
   <div class="panebody" id="dancepane">
     <p class="runnote">The Farm Called C-Sharp. Texten lyser i takt med låten. Klicka på en rad för att hoppa dit i låten.</p>
-    <div class="hudplayer"><div class="hudreactor" aria-hidden="true"><i class="a"></i><i class="b"></i><i class="c"></i><i class="e"></i><i class="d"></i><i class="f"></i></div><div style="flex: 1; min-width: 0"><div class="hudread"><span><b id="hudbpm">93.7</b></span><span><b>4/4</b></span><span>BPM</span><span>Takt</span></div>
-    <audio id="danceaudio" controls preload="metadata" src="ljud/the-farm-called-c-sharp.mp3"></audio>
-    <div class="beatbar" id="beatbar" aria-hidden="true"><span></span><span></span><span></span><span></span></div></div></div>
     <div class="lyrics" id="lyrics"></div>
   </div>
   </section>
   <section class="pane" data-pane="panel" id="pane-panel" aria-label="Förklaring">
-  <div class="panebar"><button type="button" class="grip" data-act="drag" title="Dra vyn till en annan vy: mot en kant delar platsen, i mitten blir den en flik. Pilarna byter plats med grannen." aria-label="Flytta Förklaring (dra, eller pilarna)">⠿</button><span class="panetitle">Förklaring</span><span class="panectl"><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Förklaring">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Förklaring">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Förklaring">⟲</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Förklaring">×</button></span></div>
+  <div class="panebar"><button type="button" class="grip" data-act="drag" title="Dra vyn till en annan vy: mot en kant delar platsen, i mitten blir den en flik. Pilarna byter plats med grannen." aria-label="Flytta Förklaring (dra, eller pilarna)">⠿</button><span class="panetitle">Förklaring</span><span class="panectl"><button type="button" data-act="zoomout" title="Zooma ut (Ctrl + mushjul)" aria-label="Zooma ut Förklaring">−</button><span class="zoomval">100 %</span><button type="button" data-act="zoomin" title="Zooma in (Ctrl + mushjul)" aria-label="Zooma in Förklaring">+</button><button type="button" data-act="zoomreset" title="Tillbaka till 100 %" aria-label="Återställ zoomen för Förklaring">⟲</button><button type="button" data-act="full" title="Vyn i helskärm (Esc avslutar)" aria-label="Förklaring i helskärm">⛶</button><button type="button" data-act="hide" title="Dölj vyn" aria-label="Dölj Förklaring">×</button></span></div>
   <div class="panebody" id="panel" aria-live="polite">
     <p class="empty">Klicka på en ruta i flödesschemat, en del i klassdiagrammet, en rad i koden eller på Fel 1–6 högst upp.<br>I läget Problem visas felet och startkoden. I läget Lösning visas koden efter lagningen.<br>Vyerna kan dras till nya platser i handtaget ⠿ (bredvid, ovanför, under eller som flik), döljas och zoomas. Layout högst upp har färdiga upplägg.</p>
   </div>
@@ -1869,7 +1887,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
   document.getElementById('prev').addEventListener('click', function () { step(-1); });
   document.getElementById('next').addEventListener('click', function () { step(1); });
   document.addEventListener('keydown', function (e) {
-    if (e.target.closest && e.target.closest('.node, ul.pts li, .cdm, .cdc, .splitter, .grip, .ptab, #runpane, .laymenu')) return;
+    if (e.target.closest && e.target.closest('.node, ul.pts li, .cdm, .cdc, .splitter, .corner, .grip, .ptab, #runpane, .laymenu')) return;
     if (e.key === 'ArrowRight') step(1);
     if (e.key === 'ArrowLeft') step(-1);
   });
@@ -2666,7 +2684,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
   // both ways, the arrow keys on a handle swap the view with its neighbour, and the Layout menu has
   // ready layouts. Dance and the other choices each keep their own layout, kept in this browser.
   var PANES = ['flow', 'class', 'code', 'panel', 'run', 'dance', 'build'];
-  var PANE_NAMES = { flow: 'Flödesschema', 'class': 'Klassdiagram', code: 'Koden', panel: 'Förklaring', run: 'Kör programmet', dance: 'Dance', build: 'Bygget' };
+  var PANE_NAMES = { flow: 'Flödesschema', 'class': 'Klassdiagram', code: 'Koden', panel: 'Förklaring', run: 'Kör programmet', dance: 'Lyrics', build: 'Bygget' };
   var ZOOMS = [0.5, 0.67, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3];
   // A group with one view, a split (row: side by side, col: above each other) and a group of tabs.
   function G(p) { return { t: 'g', p: [p], a: p }; }
@@ -2691,6 +2709,9 @@ if (typeof module !== 'undefined') module.exports = KK2;
     var six = dance ? ['flow', 'dance', 'build', 'code', 'class', 'panel'] : ['flow', 'class', 'code', 'panel', 'run', 'build'];
     if (name === '2+2+2') return S('col', [S('row', six.slice(0, 2)), S('row', six.slice(2, 4)), S('row', six.slice(4, 6))]);
     if (name === 'sex') return S('row', six);
+    // Asked for: all the views visible at once: in Dance all seven, four above and three below.
+    if (name === 'alla7') return dance ? S('col', [S('row', ['flow', 'dance', 'build', 'code']), S('row', ['class', 'panel', 'run'])], [1.2, 1])
+      : S('col', [S('row', ['flow', 'class', 'code']), S('row', ['panel', 'run', 'build'])], [1.2, 1]);
     if (name === 'staplat') return S('col', [a[0], a[1], third(), a[3]]);
     if (name === 'flikar') return S('row', [T(a[0], a[1]), dance ? T('build', 'code', 'panel', 'class') : T('code', 'panel')]);
     if (name === 'kor') return S('row', ['flow', 'code', 'run'], [34, 30, 36]);
@@ -2861,6 +2882,29 @@ if (typeof module !== 'undefined') module.exports = KK2;
     var root = buildNode(layout.tree);
     root.classList.add('proot');
     hub.insertBefore(root, paneStore);
+    // Asked for: one handle that changes the size both ways, "i en kvadrat". Where the divider beside
+    // a view (to its right) meets the divider under it, the view gets a small square at its corner.
+    Array.prototype.slice.call(root.querySelectorAll('.pgroup')).forEach(function (g) {
+      var sx = null, sy = null, x = g;
+      while (x.parentNode && x.parentNode.classList && x.parentNode.classList.contains('psplit') && !(sx && sy)) {
+        var par = x.parentNode, nx = x.nextElementSibling;
+        if (nx && nx.classList.contains('splitter')) {
+          if (par.classList.contains('row') && !sx) sx = nx;
+          if (par.classList.contains('col') && !sy) sy = nx;
+        }
+        x = par;
+      }
+      if (!sx || !sy) return;
+      var c = document.createElement('div');
+      c.className = 'corner';
+      c.tabIndex = 0;
+      c.setAttribute('role', 'button');
+      c.setAttribute('aria-label', 'Ändra bredd och höjd samtidigt (dra, eller pilarna åt alla håll)');
+      c.title = 'Dra för att ändra bredd och höjd samtidigt';
+      c.setAttribute('data-sx', sx.getAttribute('data-split'));
+      c.setAttribute('data-sy', sy.getAttribute('data-split'));
+      g.appendChild(c);
+    });
     PANES.forEach(function (p) {
       var m = scrollMem[p];
       if (m && paneEl(p).offsetParent) scrollersOf(p).forEach(function (b, k) { if (m[k]) { b.scrollTop = m[k][0]; b.scrollLeft = m[k][1]; } });
@@ -2903,8 +2947,8 @@ if (typeof module !== 'undefined') module.exports = KK2;
     } else setTree(S('row', [t, G(p)], [Math.max(2, panesIn(t).length - 1), 1]));
   }
   function showPane(p, on, quiet) {
-    // The Dance view belongs to the Dance choice: showing it chooses Dance (whose layout has it),
-    // hiding it stops the song.
+    // The Lyrics view belongs to Dance: showing it in Problem or Lösning chooses Dance. Hiding it
+    // leaves the song playing, since the player is in the top bar.
     if (on && p === 'dance' && !inDanceView()) { setView('dance'); return; }
     var r = groupOf(layout.tree, p);
     if (on) {
@@ -2916,7 +2960,6 @@ if (typeof module !== 'undefined') module.exports = KK2;
     }
     applyLayout();
     if (on && !quiet) flashPane(p);
-    if (!on && p === 'dance') dancePause();
   }
   // Two views change places (the arrow keys on a view's handle).
   function swapPanes(a, b) {
@@ -3017,6 +3060,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
     else if (act === 'zoomout') zoomPane(p, -1);
     else if (act === 'zoomreset') zoomPane(p, 0);
     else if (act === 'hide') showPane(p, false);
+    else if (act === 'full') { if (fullEl() === paneEl(p)) leaveFull(); else goFull(paneEl(p)); }
   });
   // The keyboard way to move a view: the arrow keys on its handle swap it with the view before or
   // after it.
@@ -3041,6 +3085,53 @@ if (typeof module !== 'undefined') module.exports = KK2;
     paneEl(p).querySelector('.grip').focus();
   });
   hub.addEventListener('mousedown', function (e) { if (e.target.closest('.panebar .grip, .ptab')) e.preventDefault(); });
+  // Asked for: full screen. The button at the top shows the whole page in full screen, and the ⛶ in
+  // a view's bar shows only that view. Esc, or the same button again, goes back. Where the browser
+  // does not allow full screen (an iPhone, or a page shown inside another app), a view instead
+  // covers the whole window (class maxed), and the page button is not shown.
+  var fullBtn = document.getElementById('fullbtn');
+  function maxedPane() { return hub.querySelector('.pane.maxed'); }
+  function fullEl() { return document.fullscreenElement || document.webkitFullscreenElement || maxedPane() || null; }
+  function setMaxed(el) {
+    var m = maxedPane();
+    if (m) m.classList.remove('maxed');
+    if (el) el.classList.add('maxed');
+    document.body.classList.toggle('maxing', !!el);
+    fullChanged();
+  }
+  function goFull(el) {
+    var f = el.requestFullscreen || el.webkitRequestFullscreen, pane = el.classList.contains('pane');
+    if (!f) { if (pane) setMaxed(el); return; }
+    var r = f.call(el), answered = false;
+    if (r && r.then) r.then(function () { answered = true; }, function () { answered = true; if (pane) setMaxed(el); });
+    // Some apps never answer the request: then the view covers the window after a moment.
+    setTimeout(function () { if (pane && !answered && !document.fullscreenElement && !document.webkitFullscreenElement) setMaxed(el); }, 800);
+  }
+  function leaveFull() {
+    if (maxedPane()) { setMaxed(null); return; }
+    var f = document.exitFullscreen || document.webkitExitFullscreen;
+    if (!f) return;
+    var r = f.call(document);
+    if (r && r.catch) r.catch(function () {});
+  }
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && maxedPane()) setMaxed(null); });
+  if (!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen)) document.body.classList.add('nofull');
+  fullBtn.addEventListener('click', function () { if (fullEl()) leaveFull(); else goFull(document.documentElement); });
+  function fullChanged() {
+    var m = maxedPane();
+    if (m && (document.fullscreenElement || document.webkitFullscreenElement)) { m.classList.remove('maxed'); document.body.classList.remove('maxing'); }
+    var f = fullEl(), page = f === document.documentElement;
+    fullBtn.textContent = page ? '⛶ Avsluta helskärm' : '⛶ Helskärm';
+    fullBtn.setAttribute('aria-pressed', String(page));
+    PANES.forEach(function (p) {
+      var b = paneEl(p).querySelector('[data-act="full"]'), on = f === paneEl(p);
+      b.classList.toggle('on', on);
+      b.title = on ? 'Tillbaka från helskärm (Esc)' : 'Vyn i helskärm (Esc avslutar)';
+    });
+    PANES.forEach(applyZoom);
+  }
+  document.addEventListener('fullscreenchange', fullChanged);
+  document.addEventListener('webkitfullscreenchange', fullChanged);
   // The Layout menu at the top: the ready layouts, each view on or off, and a reset. It opens under
   // its button, inside the window (it scrolls when the window is low), and closes on a click outside
   // it or on Escape.
@@ -3066,35 +3157,58 @@ if (typeof module !== 'undefined') module.exports = KK2;
       var name = b.getAttribute('data-preset');
       if (name === 'aterstall') { PANES.forEach(function (p) { layout.zoom[p] = 1; }); name = ''; }
       setTree(presetTree(name, inDanceView()));
-      if (inDanceView() && !inLayout('dance')) addToTree('dance');
       applyLayout();
       layMenu.open = false;
       layMenu.querySelector('summary').focus();
     });
   });
   // Dragging a divider (or the arrow keys on it) moves the room between the two parts beside it:
-  // sideways between parts side by side, up and down between parts above each other.
-  hub.addEventListener('pointerdown', function (e) {
-    var s = e.target.closest('.splitter');
-    if (!s) return;
-    e.preventDefault();
+  // sideways between parts side by side, up and down between parts above each other. splitDrag
+  // starts one such drag and returns how to set the divider at a pointer position.
+  function splitDrag(s, p0) {
     var ref = splitRefs[+s.getAttribute('data-split')], n = ref.n, i = ref.i, row = n.d === 'row';
     var a = s.previousElementSibling, b = s.nextElementSibling, ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
-    var la = row ? ra.width : ra.height, lb = row ? rb.width : rb.height, sum = n.w[i] + n.w[i + 1], p0 = row ? e.clientX : e.clientY;
-    s.classList.add('drag');
-    function move(ev) {
-      var m = Math.min(80, (la + lb) / 2), na = Math.max(m, Math.min(la + lb - m, la + (row ? ev.clientX : ev.clientY) - p0));
+    var la = row ? ra.width : ra.height, lb = row ? rb.width : rb.height, sum = n.w[i] + n.w[i + 1];
+    return function (pos) {
+      var m = Math.min(80, (la + lb) / 2), na = Math.max(m, Math.min(la + lb - m, la + pos - p0));
       n.w[i] = Math.max(sum * 0.02, Math.min(sum * 0.98, sum * na / Math.max(la + lb, 1)));
       n.w[i + 1] = sum - n.w[i];
       a.style.flex = n.w[i] + ' 1 0px';
       b.style.flex = n.w[i + 1] + ' 1 0px';
       s.setAttribute('aria-valuenow', String(Math.round(100 * n.w[i] / sum)));
+    };
+  }
+  // The arrow keys move a divider by 5 % of the room of its two parts (dir -1 or 1).
+  function splitKey(s, dir) {
+    var ref = splitRefs[+s.getAttribute('data-split')], n = ref.n, i = ref.i, sum = n.w[i] + n.w[i + 1];
+    n.w[i] = Math.max(sum * 0.15, Math.min(sum * 0.85, n.w[i] + dir * sum * 0.05));
+    n.w[i + 1] = sum - n.w[i];
+    s.previousElementSibling.style.flex = n.w[i] + ' 1 0px';
+    s.nextElementSibling.style.flex = n.w[i + 1] + ' 1 0px';
+    s.setAttribute('aria-valuenow', String(Math.round(100 * n.w[i] / sum)));
+  }
+  function splitOf(c, axis) { return hub.querySelector('.splitter[data-split="' + c.getAttribute('data-' + axis) + '"]'); }
+  hub.addEventListener('pointerdown', function (e) {
+    var s = e.target.closest('.splitter'), c = !s && e.target.closest('.corner');
+    if (!s && !c) return;
+    e.preventDefault();
+    var moves = [], el = s || c;
+    if (s) {
+      var row = splitRefs[+s.getAttribute('data-split')].n.d === 'row';
+      moves.push([splitDrag(s, row ? e.clientX : e.clientY), row]);
+    } else {
+      // The corner square: the divider beside the view follows the pointer sideways and the
+      // divider under it follows it up and down, both at once.
+      moves.push([splitDrag(splitOf(c, 'sx'), e.clientX), true]);
+      moves.push([splitDrag(splitOf(c, 'sy'), e.clientY), false]);
     }
+    el.classList.add('drag');
+    function move(ev) { moves.forEach(function (m) { m[0](m[1] ? ev.clientX : ev.clientY); }); }
     function up() {
       document.removeEventListener('pointermove', move);
       document.removeEventListener('pointerup', up);
       document.removeEventListener('pointercancel', up);
-      s.classList.remove('drag');
+      el.classList.remove('drag');
       saveLayout();
     }
     document.addEventListener('pointermove', move);
@@ -3102,19 +3216,19 @@ if (typeof module !== 'undefined') module.exports = KK2;
     document.addEventListener('pointercancel', up);
   });
   hub.addEventListener('keydown', function (e) {
-    var s = e.target.closest('.splitter');
-    if (!s) return;
-    var ref = splitRefs[+s.getAttribute('data-split')], n = ref.n, i = ref.i;
-    var k = (n.d === 'row' ? ['ArrowLeft', 'ArrowRight'] : ['ArrowUp', 'ArrowDown']).indexOf(e.key);
-    if (k < 0) return;
+    var s = e.target.closest('.splitter'), c = !s && e.target.closest('.corner'), d;
+    if (s) {
+      var k = (splitRefs[+s.getAttribute('data-split')].n.d === 'row' ? ['ArrowLeft', 'ArrowRight'] : ['ArrowUp', 'ArrowDown']).indexOf(e.key);
+      if (k < 0) return;
+      d = [s, k ? 1 : -1];
+    } else if (c) {
+      var m = { ArrowLeft: ['sx', -1], ArrowRight: ['sx', 1], ArrowUp: ['sy', -1], ArrowDown: ['sy', 1] }[e.key];
+      if (!m) return;
+      d = [splitOf(c, m[0]), m[1]];
+    } else return;
     e.preventDefault();
     e.stopPropagation();
-    var sum = n.w[i] + n.w[i + 1];
-    n.w[i] = Math.max(sum * 0.15, Math.min(sum * 0.85, n.w[i] + (k ? 1 : -1) * sum * 0.05));
-    n.w[i + 1] = sum - n.w[i];
-    s.previousElementSibling.style.flex = n.w[i] + ' 1 0px';
-    s.nextElementSibling.style.flex = n.w[i + 1] + ' 1 0px';
-    s.setAttribute('aria-valuenow', String(Math.round(100 * n.w[i] / sum)));
+    splitKey(d[0], d[1]);
     saveLayout();
   });
   // Dragging a view by its handle (⠿) or its tab: a frame shows where it will land, Escape cancels.
@@ -3734,7 +3848,6 @@ if (typeof module !== 'undefined') module.exports = KK2;
   });
   function dancePlay() {
     if (!layout) return;
-    if (!inLayout('dance')) showPane('dance', true, true);
     var p = dAudio.play();
     if (p && p.catch) p.catch(function (e) { if (e && e.name === 'NotAllowedError') danceAskToStart(); });
     return p;
@@ -3757,15 +3870,14 @@ if (typeof module !== 'undefined') module.exports = KK2;
     document.addEventListener('keydown', go, true);
   }
   function dancePause() { if (!dAudio.paused) dAudio.pause(); }
-  // Choosing Dance switches to the Dance layout (with the Dance view in it); leaving Dance stops the
-  // song and switches back to the layout of Problem and Lösning, which has no Dance view.
+  // Choosing Dance switches to the Dance layout; leaving Dance stops the song and switches back to the
+  // layout of Problem and Lösning, which has no Lyrics view.
   function danceViewChanged(on) {
     if (!layout) return;
     if (on) { dCardKey = null; dCardLine = -1; if (dLine >= 0) danceCard(dLine); else danceCardIntro(); }
     else danceCardClose();
     var want = on ? layout.dance : layout.normal, changed = layout.tree !== want;
     layout.tree = want;
-    if (on && !inLayout('dance')) { addToTree('dance'); changed = true; }
     if (!on) {
       dancePause();
       var r = groupOf(layout.tree, 'dance');
