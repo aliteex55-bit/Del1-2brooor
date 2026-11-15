@@ -238,7 +238,9 @@ body.maxing #panes { z-index: 90 !important; }
 .bvs-act { background: #333; display: flex; flex-direction: column; align-items: center; gap: 16px; padding-top: 12px; }
 .bvs-act i { width: 20px; height: 20px; border: 2px solid #858585; border-radius: 4px; }
 .bvs-act i.on { border-color: #fff; box-shadow: -11px 0 0 -8px #fff; }
-.bvs-side { background: #252526; padding: 8px 0; overflow: auto; font-size: 13px; scrollbar-width: thin; }
+.bvs-side { background: #252526; padding: 8px 0; overflow: auto; font-size: 13px; scrollbar-width: thin; display: flex; flex-direction: column; }
+.bvs-side > * { flex: none; }
+.bvs-side > .bvs-map { flex: 1 1 0; min-height: 80px; overflow: auto; scrollbar-width: thin; }
 .bvs-side h5 { margin: 0 12px 6px; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #bbb; font-weight: 600; }
 .bvs-side h5.bvs-sec { margin-top: 14px; }
 .bvs-file { display: flex; align-items: center; gap: 6px; padding: 3px 10px 3px 16px; color: #ccc; white-space: nowrap; }
@@ -271,6 +273,7 @@ body.maxing #panes { z-index: 90 !important; }
 .bcaret { display: inline-block; width: 2px; height: 1.1em; margin-left: 1px; vertical-align: -2px; background: #aeafad; box-shadow: 0 0 6px #fff; animation: bblink 1s steps(1) infinite; }
 @keyframes bblink { 50% { opacity: 0; } }
 .blens { padding-left: 62px; font: italic 12px "Segoe UI", sans-serif; color: #5b8cff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.blens.keep { color: #8b949e; }
 .bvs-mini { position: relative; border-left: 1px solid #2b2b2b; }
 .bvs-mini canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .bvs-term { flex: 0 0 30%; min-height: 80px; display: flex; flex-direction: column; border-top: 1px solid #3c3c3c; background: #1e1e1e; }
@@ -3129,7 +3132,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
   // Where each view was scrolled to. A hidden view forgets it, so it is kept here while the view
   // waits behind another tab or outside the layout.
   var scrollMem = {}, lastShown = [];
-  function scrollersOf(p) { return Array.prototype.slice.call(paneEl(p).querySelectorAll('.panebody, #term, #runout, .bvs-lines, #bvsterm')); }
+  function scrollersOf(p) { return Array.prototype.slice.call(paneEl(p).querySelectorAll('.panebody, #term, #runout, .bvs-lines, #bvsterm, #bvsmap')); }
   function applyLayout() {
     if (!layout.tree) setTree(G('panel'));
     // Moving the views around must not lose where each one was scrolled to.
@@ -3149,6 +3152,8 @@ if (typeof module !== 'undefined') module.exports = KK2;
       var m = scrollMem[p];
       if (m && paneEl(p).getClientRects().length) scrollersOf(p).forEach(function (b, k) { if (m[k]) { b.scrollTop = m[k][0]; b.scrollLeft = m[k][1]; } });
     });
+    var bm = document.getElementById('bvsmap');                 // Bygget's lyric list: on its newest line
+    if (bm && bm.getClientRects().length && typeof bMapFollow !== 'undefined' && bMapFollow) bm.scrollTop = bm.scrollHeight;
     document.querySelectorAll('.viewtoggle').forEach(function (b) { b.setAttribute('aria-pressed', String(inLayout(b.getAttribute('data-pane')))); });
     document.getElementById('runbtn').classList.toggle('on', inLayout('run'));
     PANES.forEach(applyZoom);
@@ -4667,6 +4672,51 @@ if (typeof module !== 'undefined') module.exports = KK2;
   bEl('bvsmini').appendChild(bMini);
   bLens.className = 'blens';
   var bShown = null, bLineEls = [], bLineKey = [], bCurEl = null, bLastActive = null, bMiniKey = '';
+  // Asked for: in Bygget, where the code is written live, the lyrics stay and do not disappear when
+  // they have been sung. Every sung line's lyric stays above the code it is about, as a CodeLens,
+  // oldest first (the same lyric sung again about the same code is one lens with all its times). It
+  // follows the time in the song like the rest of Bygget, so jumping back removes the lyrics not sung yet.
+  var bKeep = [], bKeepKey = '';
+  // A lyric line as plain text (the backticks that mark code in the lyrics view are left out).
+  function bLyric(i) { return DL[i].text.replace(/`/g, ''); }
+  // The line a target's lyric stands above in file f: its first line there with code on it.
+  function bAnchor(e, f) {
+    var a = null;
+    e.show.forEach(function (o) { if (!a && o.f === f && o.len) a = o; });
+    if (!a) e.show.forEach(function (o) { if (!a && o.f === f) a = o; });
+    return a;
+  }
+  function bKeepLenses(t, f, skip) {
+    var n = 0;
+    while (n < BEV.length && BEV[n].t <= t) n++;          // the targets sung so far
+    var key = f + '|' + n + '|' + skip;
+    if (key === bKeepKey) return;
+    bKeepKey = key;
+    bKeep.forEach(function (el) { if (el.parentNode) el.parentNode.removeChild(el); });
+    bKeep = [];
+    var at = {};
+    for (var k = 0; k < n; k++) {
+      if (k === skip) continue;                           // that one is shown as the lyric being sung
+      var a = bAnchor(BEV[k], f);
+      if (a) (at[a.n] = at[a.n] || []).push(k);
+    }
+    Object.keys(at).forEach(function (ln) {
+      var lineEl = bLineEls[+ln - 1], seen = {}, order = [];
+      if (!lineEl) return;
+      at[ln].forEach(function (k) {
+        var text = bLyric(BEV[k].i);
+        if (!seen[text]) { seen[text] = []; order.push(text); }
+        seen[text].push(bClock(BEV[k].t));
+      });
+      order.forEach(function (text) {
+        var el = document.createElement('div');
+        el.className = 'blens keep';
+        el.textContent = '♪ “' + text + '” · ' + seen[text].join(', ');
+        bLinesEl.insertBefore(el, lineEl);
+        bKeep.push(el);
+      });
+    });
+  }
   function bTyped(o, t) { return t >= o.t1 ? o.len : t <= o.t0 ? 0 : Math.floor(o.len * (t - o.t0) / (o.t1 - o.t0)); }
   function bState(o, t) {
     if (t >= o.t1) return t - o.t1 < 1.2 && o.len ? 'f' : 'd';
@@ -4694,6 +4744,8 @@ if (typeof module !== 'undefined') module.exports = KK2;
     bLineKey = bLineEls.map(function () { return ''; });
     bCurEl = null;
     bMiniKey = '';
+    bKeep = [];
+    bKeepKey = '';
   }
   function bClock(s) { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ':' + ('0' + s % 60).slice(-2); }
   function bSection(t) { var s = ''; DL.forEach(function (L) { if (L.start !== null && L.start !== undefined && L.start <= t) s = L.section; }); return s; }
@@ -4706,15 +4758,19 @@ if (typeof module !== 'undefined') module.exports = KK2;
   function bDrawMini(t, f) {
     var box = bMini.parentNode, w = box.clientWidth, h = box.clientHeight;
     if (!w || !h) return;
-    var lines = BLF[f], lh = Math.min(3, h / Math.max(lines.length, 1)), top = bLinesEl.scrollTop / Math.max(bLinesEl.scrollHeight, 1);
-    var key = f + '|' + w + 'x' + h + '|' + Math.round(top * 200) + '|' + lines.map(function (o) { return bState(o, t).charAt(0); }).join('');
+    var lines = BLF[f], lh = Math.min(3, h / Math.max(lines.length, 1)), st = bLinesEl.scrollTop, ch = bLinesEl.clientHeight;
+    var lo = 0, hi = bLineEls.length - 1, a = 0;
+    while (lo <= hi) { var mid = (lo + hi) >> 1, e = bLineEls[mid]; if (e.offsetTop + e.offsetHeight > st) { a = mid; hi = mid - 1; } else lo = mid + 1; }
+    var z = a;
+    while (z + 1 < bLineEls.length && bLineEls[z + 1].offsetTop < st + ch) z++;
+    var key = f + '|' + w + 'x' + h + '|' + a + '-' + z + '|' + lines.map(function (o) { return bState(o, t).charAt(0); }).join('');
     if (key === bMiniKey) return;
     bMiniKey = key;
     if (bMini.width !== w || bMini.height !== h) { bMini.width = w; bMini.height = h; }
     var g = bMini.getContext('2d');
     g.clearRect(0, 0, w, h);
     g.fillStyle = 'rgba(255,255,255,.07)';
-    g.fillRect(0, top * lines.length * lh, w, bLinesEl.clientHeight / Math.max(bLinesEl.scrollHeight, 1) * lines.length * lh);
+    if (bLineEls.length) g.fillRect(0, a * lh, w, (z - a + 1) * lh);
     lines.forEach(function (o, k) {
       if (!o.len) return;
       var ind = o.text.length - o.text.replace(/^\s+/, '').length, s = bState(o, t).charAt(0);
@@ -4747,6 +4803,8 @@ if (typeof module !== 'undefined') module.exports = KK2;
     }
     return h;
   }
+  var bMapFollow = true;
+  bEl('bvsmap').addEventListener('scroll', function () { var m = this; if (m.clientHeight) bMapFollow = m.scrollTop + m.clientHeight >= m.scrollHeight - 4; });
   function buildTick(t) {
     if (!bLinesEl || !paneOn('build')) return;
     // What the editor shows: the code the line being sung is about, or else the line being typed in
@@ -4779,9 +4837,11 @@ if (typeof module !== 'undefined') module.exports = KK2;
     var lensEv = show || (typing && act.ev >= 0 && act.ev === dk) ? de : null;
     if (lensEv && curEl) {
       var when = !show ? 'skrivs nu' : cur.ev === dk ? 'skrevs nyss' : t >= cur.t1 ? 'skrevs ' + bClock(cur.t0) : 'skrivs senare';
-      bLens.textContent = '♪ “' + DL[lensEv.i].text + '” · ' + when;
+      bLens.textContent = '♪ “' + bLyric(lensEv.i) + '” · ' + when;
       if (bLens.nextSibling !== curEl) bLinesEl.insertBefore(bLens, curEl);
     } else if (bLens.parentNode) bLens.parentNode.removeChild(bLens);
+    bKeepLenses(t, f, lensEv && curEl ? dk : -1);
+    if (lensEv && curEl && bLens.nextSibling !== curEl) bLinesEl.insertBefore(bLens, curEl);   // closest to its line
     if (cur !== bLastActive && curEl) {
       bLastActive = cur;
       var want = curEl.offsetTop - bLinesEl.clientHeight / 3;
@@ -4808,13 +4868,14 @@ if (typeof module !== 'undefined') module.exports = KK2;
       return '<span' + (x === f ? ' class="on"' : '') + '>' + esc(x) + (fileDone[x] < BFTOTAL[x] ? ' ●' : '') + '</span>';
     }).join(''));
     bSet('bvscrumbs', esc(cur ? bWhere(cur).join(' › ') : f));
-    var recent = BEV.filter(function (e) { return e.t <= t && e.show.length; }).slice(-4);
+    var recent = BEV.filter(function (e) { return e.t <= t && e.show.length; }), mapWas = bLast.bvsmap;
     bSet('bvsmap', recent.map(function (e) {
       var fs = e.show.filter(function (o) { return o.len; }), first = fs[0] || e.show[0], last = fs.length ? fs[fs.length - 1] : first;
-      var text = DL[e.i].text, cut = text.length > 30 ? text.slice(0, 29) + '…' : text;
+      var text = bLyric(e.i), cut = text.length > 30 ? text.slice(0, 29) + '…' : text;
       return '<div' + (e === de ? ' class="on"' : '') + '>' + esc(cut) + ' → <b>' + (first.f === f ? 'rad ' : esc(first.f) + ' ') + first.n +
         (last.f === first.f && last.n > first.n ? '–' + last.n : '') + '</b></div>';
     }).join(''));
+    if (bLast.bvsmap !== mapWas && bMapFollow) { var mapEl = bEl('bvsmap'); mapEl.scrollTop = mapEl.scrollHeight; }
     var di = danceEventAt(t), dur = dAudio.duration || DB[DB.length - 1] || 0;
     bSet('bvslyric', esc('♪ ' + (di >= 0 ? DL[DEV[di].i].text : 'The Farm Called C-Sharp')));
     bSet('bvsprog', bClock(t) + ' / ' + bClock(dur) + ' · ' + (t >= B_DONE ? 'BYGGT OCH KÖRT' : pct + ' %<span class="bvs-long"> AV PROGRAMMET SKRIVET</span>'));
