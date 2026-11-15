@@ -423,6 +423,10 @@ body.view-bug .layer.ext { border-left-color: var(--accent); background: var(--a
 .lk { color: var(--muted); font-size: 13px; margin-right: 2px; }
 .fullcode tr { cursor: pointer; }
 .fullcode tr:hover td { background: var(--accent-soft); }
+.fullcode tr.clens td { padding: 3px 10px 0 52px; font: italic 12px "Segoe UI", system-ui, sans-serif; color: var(--muted); white-space: nowrap; cursor: default; }
+.fullcode tr.clens td > div { width: 0; min-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.fullcode tr.clens.now td { color: var(--accent); font-weight: 600; }
+.fullcode tr.clens:hover td { background: transparent; }
 body.view-dance #codepane > p.what, body.view-dance #codepane .codesel .chips, body.view-dance #codepane .codesel button { display: none; }
 body.view-dance #codepane .codesel { padding: 3px 10px; margin: 0 0 4px; }
 body.view-dance #codepane { scrollbar-gutter: stable; }
@@ -2067,14 +2071,11 @@ if (typeof module !== 'undefined') module.exports = KK2;
       if (btn.getAttribute('data-view') === 'dance') dancePlay();
     });
   });
-  // Asked for: the page starts in Dance and the song plays by itself. A link to a box or a report
-  // (#...) still opens that, in Problem or Lösning as last chosen in this browser (not Dance, which
-  // hides the explanation), and ?vy= picks a view.
+  // Asked for: the page starts in Dance and the song plays by itself. Asked for next: it always
+  // starts in Dance ("öppna i dance läget direkt som tidigare"), also when the address still has a
+  // #... part from a box or a view opened earlier (that part used to open Problem). What the #...
+  // names is still opened, and shown again when Dance is left. ?vy= picks a view.
   var view = 'dance';
-  if (location.hash.length > 1) {
-    view = 'bug';
-    try { if (localStorage.getItem('kk2-vy') === 'fix') view = 'fix'; } catch (e) {}
-  }
   var asked = (location.search.match(/[?&]vy=([a-z]+)/) || [])[1];
   if (asked === 'losning') view = 'fix';
   if (asked === 'problem') view = 'bug';
@@ -2337,7 +2338,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
   // fit), so a zoom chosen for reading the code in Problem or Lösning does not push it out of view.
   var codeAnim = 0, CODE_EMIN = 0.02, CODE_EMAX = 1.15;
   function codeFollowActive() { return inDanceView() && paneOn('code'); }
-  function codeRows(fc) { return fc.querySelectorAll('tr[data-line]'); }
+  function codeRows(fc) { return fc.querySelectorAll('tr'); }
   // The view's own zoom: screen pixels for one of the view's own (scroll) pixels.
   function codeK() { var r = codePane.getBoundingClientRect(); return codePane.offsetHeight ? r.height / codePane.offsetHeight : 1; }
   // A place in the code as a row number with a fraction (0 = the top of the first row), and back.
@@ -2377,9 +2378,12 @@ if (typeof module !== 'undefined') module.exports = KK2;
     var lit = fc.querySelectorAll('tr.blk');
     if (!lit.length) return null;
     var z0 = parseFloat(fc.style.zoom) || 1, k = codeK();
-    var i0 = +lit[0].getAttribute('data-line') - 1, i1 = +lit[lit.length - 1].getAttribute('data-line');
-    var a = lit[0].getBoundingClientRect(), b = lit[lit.length - 1].getBoundingClientRect();
-    var blockH = (b.bottom - a.top) / z0, rowH = a.height / z0;
+    // The block: the lyric being sung right above the yellow lines (when there is one), to the last
+    // yellow line.
+    var now = fc.querySelector('tr.clens.now'), l0 = lit[0].getBoundingClientRect(), l1 = lit[lit.length - 1].getBoundingClientRect();
+    var nr = now ? now.getBoundingClientRect() : null, topEl = nr && nr.top < l0.top ? now : lit[0];
+    var a = { top: Math.min(l0.top, nr ? nr.top : l0.top) }, b = { bottom: Math.max(l1.bottom, nr ? nr.bottom : l1.bottom) };
+    var blockH = (b.bottom - a.top) / z0, rowH = l0.height / z0, iTop = Array.prototype.indexOf.call(rows, topEl);
     var left = fc.getBoundingClientRect().left, w = 0, rg = document.createRange();
     Array.prototype.forEach.call(lit, function (tr) {
       rg.selectNodeContents(tr.lastElementChild);
@@ -2392,7 +2396,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
     var fit = Math.min(availH / blockH, w > 16 ? availW / w : Infinity);
     var e = Math.min(CODE_EMAX, Math.max(CODE_EMIN, fit * k));
     var z = e / k * (layout && layout.zoom.codeDance || 1);
-    var c = blockH * z <= availH + 0.5 ? (i0 + i1) / 2 : i0 + (vh * k / 2 - 12) / (rowH * z);
+    var c = blockH * z <= availH + 0.5 ? codeRowAt(rows, (a.top + b.bottom) / 2) : iTop + (vh * k / 2 - 12) / (rowH * z);
     return { z: z, c: c };
   }
   // Fits the yellow lines into the view; prev (what the view showed before) makes it glide from there.
@@ -2420,10 +2424,54 @@ if (typeof module !== 'undefined') module.exports = KK2;
     }
     codeAnim = requestAnimationFrame(step);
   }
+  // Asked for: "include lyrics in koden window". In Dance the Koden view shows the lyrics like
+  // Bygget does: the lyric being sung (blue) above the code it is about, and every lyric sung so far
+  // (grey) above its code, oldest first; the same lyric sung again about the same code is one line
+  // with all its times. They follow the time in the song, so jumping back removes the ones not sung
+  // yet. They use Bygget's list of sung targets (BEV) and its places (bAnchor), so both views agree.
+  var cLyrKey = '';
+  function codeLyrics(force, dance) {
+    var fc = codePane.querySelector('.fullcode');
+    if (!fc) { cLyrKey = ''; return false; }
+    var on = (dance === undefined ? inDanceView() : dance) && typeof BEV !== 'undefined' && BEV && BEV.length && BEV[0].show &&
+      typeof dAudio !== 'undefined' && dAudio;
+    var file = fc.getAttribute('data-file'), n = 0, t = on ? dAudio.currentTime : 0;
+    if (on) while (n < BEV.length && BEV[n].t <= t) n++;
+    var key = on ? file + '|' + n : '';
+    if (!force && key === cLyrKey) return false;
+    cLyrKey = key;
+    Array.prototype.slice.call(fc.querySelectorAll('tr.clens')).forEach(function (r) { r.parentNode.removeChild(r); });
+    if (!on) return true;
+    var at = {};
+    for (var k = 0; k < n; k++) { var a = bAnchor(BEV[k], file); if (a) (at[a.n] = at[a.n] || []).push(k); }
+    Object.keys(at).forEach(function (ln) {
+      var tr = fc.querySelector('tr[data-line="' + ln + '"]'), seen = {}, order = [];
+      if (!tr) return;
+      at[ln].forEach(function (k) {
+        var text = bLyric(BEV[k].i);
+        if (!seen[text]) { seen[text] = { times: [], now: false }; order.push(text); }
+        seen[text].times.push(bClock(BEV[k].t));
+        if (k === n - 1) seen[text].now = true;
+      });
+      // The lyric being sung goes last, right above its code.
+      order.sort(function (x, y) { return (seen[x].now ? 1 : 0) - (seen[y].now ? 1 : 0); });
+      order.forEach(function (text) {
+        var row = document.createElement('tr'), td = document.createElement('td'), d = document.createElement('div');
+        row.className = 'clens' + (seen[text].now ? ' now' : '');
+        td.colSpan = 2;
+        d.textContent = '♪ “' + text + '” · ' + seen[text].times.join(', ');
+        td.appendChild(d);
+        row.appendChild(td);
+        tr.parentNode.insertBefore(row, tr);
+      });
+    });
+    return true;
+  }
   // Dance on: fit the code; Dance off: the code at its normal size again.
   function codeFollowView(on) {
     cancelAnimationFrame(codeAnim);
     codeAnim = 0;
+    codeLyrics(true, on);
     if (on) { if (codeFollowActive()) codeFollow(null, false); return; }
     var fc = codePane.querySelector('.fullcode');
     if (fc && fc.style.zoom) { fc.style.zoom = ''; refreshCode(true); }
@@ -2485,6 +2533,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
     cancelAnimationFrame(codeAnim);
     codeAnim = 0;
     target.innerHTML = h;
+    if (inPane) codeLyrics(true);
     if (follow) {
       // In Dance: the same place and zoom as before for a moment, then the glide to the yellow lines.
       var fc = target.querySelector('.fullcode'), same = !!(fc && prev && prev.file === file);
@@ -2538,7 +2587,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
       if (paneOn('code')) { refreshCode(); flashPane('code'); } else showCode(codeSelFile());
     }
     // A line of the full code becomes the focus, and everything it belongs to is highlighted.
-    var tr = e.target.closest('.fullcode tr');
+    var tr = e.target.closest('.fullcode tr[data-line]');
     if (tr && !window.getSelection().toString()) {
       focusLine(tr.closest('.fullcode').getAttribute('data-file'), Number(tr.getAttribute('data-line')), isFix());
       if (tr.closest('#codepane')) {
@@ -4072,6 +4121,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
       }
     }
     buildTick(t);
+    if (paneOn('code') && codeLyrics(false) && codeFollowActive()) codeFollow(codeViewNow(), true);
     var b = danceBeatAt(t);
     if (b !== dBeat) {
       dBeat = b;
