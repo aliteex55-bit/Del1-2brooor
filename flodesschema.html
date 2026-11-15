@@ -317,6 +317,17 @@ body.view-dance .pbeats { display: flex; }
 @keyframes dexpbop1 { 0% { transform: none; box-shadow: 0 0 0 0 transparent; } 20% { transform: translateY(calc(-8px * var(--amp, .7))) scale(1.012); box-shadow: 0 0 0 2px var(--mark), 0 0 28px var(--mark); } 100% { transform: none; box-shadow: 0 0 0 0 transparent; } }
 .dexp.bop { animation: dexpbop .32s ease-out; }
 .dexp.bop-down { animation: dexpbop1 .55s ease-out; }
+@keyframes bkwave { 0% { transform: none; } 35% { transform: translateY(calc(-2.5px * var(--amp, .7))); } 100% { transform: none; } }
+@keyframes bkhop { 0% { transform: none; } 30% { transform: translateY(calc(-3px * var(--amp, .7))); } 100% { transform: none; } }
+@keyframes bknod { 0% { transform: none; } 30% { transform: rotate(calc(-14deg * var(--amp, .7))); } 100% { transform: none; } }
+@keyframes bkone { 0% { opacity: 1; filter: drop-shadow(0 0 7px var(--mark)); border-color: var(--mark); background-color: var(--mark); } 100% { } }
+body.view-dance.bk :is(#chart .node, #classbody .cdm, #classbody .cdc):not(.bop):not(.bop-down) { animation: bkwave .4s ease-out calc(var(--f, 0) * .32s) both; }
+body.view-dance.bk header :is(button, .laymenu > summary) { animation: bkhop .36s ease-out calc(var(--f, 0) * .3s) both; }
+body.view-dance.bk .panebar .grip { animation: bknod .4s ease-out calc(var(--f, 0) * .25s) both; }
+body.view-dance.bk-one .corner { animation: bkone .5s ease-out; }
+@keyframes bkbracket { 0% { border-color: var(--mark); filter: drop-shadow(0 0 8px var(--mark)); } 100% { } }
+body.view-dance.bk-one .pane::after { animation: bkbracket .55s ease-out; }
+@media (prefers-reduced-motion: reduce) { body.bk *, body.bk-one *, body.bk-one .pane::after { animation: none !important; } }
 @media (prefers-reduced-motion: reduce) { .dexp.bop, .dexp.bop-down { animation: none; } .pbeats span, .beatbar span { transition: none; } .pbeats span.on, .beatbar span.on { transform: none; } }
 @media (prefers-reduced-motion: reduce) { .node.bop, .cdm.bop, .cdc.bop, .node.bop-down, .cdm.bop-down, .cdc.bop-down, .lyline.now.sway-l, .lyline.now.sway-r, .lyline.now .w.on { animation: none; } }
 .splitter { flex: 0 0 7px; cursor: col-resize; background: var(--line); opacity: .45; touch-action: none; }
@@ -693,8 +704,8 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
   <button type="button" class="codebtn" id="codebtn">Hela koden</button>
   <button type="button" class="codebtn" id="cdbtn">Klassdiagram</button>
   <button type="button" class="codebtn runbtn" id="runbtn">Kör programmet</button></div></details>
-  <details class="laymenu" id="laymenu"><summary>Layout ▾</summary><div class="laypop"><h4>Färdiga layouter</h4><div class="presets"><button type="button" data-preset="start"><span class="thumb" style="grid-template-columns: 38fr 16fr 20fr 26fr 17fr; grid-template-rows: 1fr .5fr 1.8fr" aria-hidden="true"><i style="grid-column: 1 / 3; grid-row: 1"></i><i style="grid-column: 3 / 5; grid-row: 1"></i><i class="run" style="grid-column: 5; grid-row: 1 / 4"></i><i style="grid-column: 1; grid-row: 2 / 4"></i><i style="grid-column: 2 / 4; grid-row: 2 / 4"></i><i style="grid-column: 4; grid-row: 2"></i><i style="grid-column: 4; grid-row: 3"></i></span>Startlayout</button><button type="button" data-preset="alla"><span class="thumb" style="grid-template-columns: repeat(4, 1fr)" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Allt sida vid sida</button><button type="button" data-preset="2x2"><span class="thumb" style="grid-template-columns: 1.3fr 1fr; grid-template-rows: 1fr 1fr" aria-hidden="true"><i></i><i></i><i></i><i></i></span>2 uppe, 2 nere</button><button type="button" data-preset="3+1"><span class="thumb" style="grid-template-columns: repeat(3, 1fr); grid-template-rows: 1.6fr 1fr" aria-hidden="true"><i></i><i></i><i></i><i style="grid-column: 1 / 4"></i></span>3 uppe, 1 nere</button><button type="button" data-preset="1+3"><span class="thumb" style="grid-template-columns: 1.3fr 1fr; grid-template-rows: repeat(3, 1fr)" aria-hidden="true"><i style="grid-row: 1 / 4"></i><i></i><i></i><i></i></span>1 stor och 3</button><button type="button" data-preset="2+2+2"><span class="thumb" style="grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr)" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>2 uppe, 2 nere, 2 längst ner</button><button type="button" data-preset="sex"><span class="thumb" style="grid-template-columns: repeat(6, 1fr)" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>6 sida vid sida</button><button type="button" data-preset="alla7"><span class="thumb" style="grid-template-columns: repeat(12, 1fr); grid-template-rows: 1fr 1fr" aria-hidden="true"><i style="grid-column: span 3"></i><i style="grid-column: span 3"></i><i style="grid-column: span 3"></i><i style="grid-column: span 3"></i><i style="grid-column: span 4"></i><i style="grid-column: span 4"></i><i style="grid-column: span 4"></i></span>Alla vyer</button><button type="button" data-preset="staplat"><span class="thumb" style="grid-template-rows: repeat(4, 1fr)" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Allt staplat</button><button type="button" data-preset="flikar"><span class="thumb" style="grid-template-columns: 1fr 1fr" aria-hidden="true"><i class="tb"></i><i class="tb"></i></span>Flikar i 2 rutor</button><button type="button" data-preset="kor"><span class="thumb" style="grid-template-columns: 1fr 1fr 1.1fr" aria-hidden="true"><i></i><i></i><i class="run"></i></span>Flöde, kod och körning</button><button type="button" data-preset="schema"><span class="thumb" style="grid-template-columns: 1fr 1fr" aria-hidden="true"><i></i><i></i></span>Schema och förklaring</button></div><h4>Vyer</h4><div class="vyer" role="group" aria-label="Vyer"><button type="button" class="viewtoggle" data-pane="flow" aria-pressed="true">Flöde</button><button type="button" class="viewtoggle" data-pane="class" aria-pressed="true">Klassdiagram</button><button type="button" class="viewtoggle" data-pane="code" aria-pressed="true">Kod</button><button type="button" class="viewtoggle" data-pane="panel" aria-pressed="true">Förklaring</button><button type="button" class="viewtoggle" data-pane="run" aria-pressed="false">Kör</button><button type="button" class="viewtoggle" data-pane="dance" aria-pressed="false">Lyrics</button><button type="button" class="viewtoggle" data-pane="build" aria-pressed="false">Bygget</button></div><p>Eller bygg själv: dra en vy i handtaget ⠿ (eller i dess flik) och släpp den mot en kant av en annan vy, så delas platsen åt det hållet. Släpp i mitten, så byter vyerna plats. Släpp på en vys namnlist, så hamnar vyerna som flikar på samma plats. Dra i skarvarna åt alla håll för att ändra storlek, eller i fyrkanten där två skarvar möts för att ändra bredd och höjd samtidigt. Dance och de andra lägena har var sin layout, och valet sparas i webbläsaren.</p><button type="button" class="layreset" data-preset="aterstall">Återställ allt</button></div></details>
-  <div class="textsize" role="group" aria-label="Textstorlek" title="Textstorlek"><button type="button" id="textminus" aria-label="Mindre text">A−</button><span id="textval">115 %</span><button type="button" id="textplus" aria-label="Större text">A+</button></div>
+  <details class="laymenu" id="laymenu"><summary>Layout ▾</summary><div class="laypop"><h4>Färdiga layouter</h4><div class="presets"><button type="button" data-preset="start"><span class="thumb" style="grid-template-columns: 30fr 4fr 34fr 32fr 37fr; grid-template-rows: 23fr 15fr 62fr" aria-hidden="true"><i style="grid-column: 1; grid-row: 1"></i><i style="grid-column: 2 / 5; grid-row: 1"></i><i class="run" style="grid-column: 5; grid-row: 1 / 3"></i><i style="grid-column: 1 / 3; grid-row: 2 / 4"></i><i style="grid-column: 3; grid-row: 2 / 4"></i><i style="grid-column: 4; grid-row: 2 / 4"></i><i style="grid-column: 5; grid-row: 3"></i></span>Startlayout</button><button type="button" data-preset="alla"><span class="thumb" style="grid-template-columns: repeat(4, 1fr)" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Allt sida vid sida</button><button type="button" data-preset="2x2"><span class="thumb" style="grid-template-columns: 1.3fr 1fr; grid-template-rows: 1fr 1fr" aria-hidden="true"><i></i><i></i><i></i><i></i></span>2 uppe, 2 nere</button><button type="button" data-preset="3+1"><span class="thumb" style="grid-template-columns: repeat(3, 1fr); grid-template-rows: 1.6fr 1fr" aria-hidden="true"><i></i><i></i><i></i><i style="grid-column: 1 / 4"></i></span>3 uppe, 1 nere</button><button type="button" data-preset="1+3"><span class="thumb" style="grid-template-columns: 1.3fr 1fr; grid-template-rows: repeat(3, 1fr)" aria-hidden="true"><i style="grid-row: 1 / 4"></i><i></i><i></i><i></i></span>1 stor och 3</button><button type="button" data-preset="2+2+2"><span class="thumb" style="grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr)" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>2 uppe, 2 nere, 2 längst ner</button><button type="button" data-preset="sex"><span class="thumb" style="grid-template-columns: repeat(6, 1fr)" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>6 sida vid sida</button><button type="button" data-preset="alla7"><span class="thumb" style="grid-template-columns: repeat(12, 1fr); grid-template-rows: 1fr 1fr" aria-hidden="true"><i style="grid-column: span 3"></i><i style="grid-column: span 3"></i><i style="grid-column: span 3"></i><i style="grid-column: span 3"></i><i style="grid-column: span 4"></i><i style="grid-column: span 4"></i><i style="grid-column: span 4"></i></span>Alla vyer</button><button type="button" data-preset="staplat"><span class="thumb" style="grid-template-rows: repeat(4, 1fr)" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Allt staplat</button><button type="button" data-preset="flikar"><span class="thumb" style="grid-template-columns: 1fr 1fr" aria-hidden="true"><i class="tb"></i><i class="tb"></i></span>Flikar i 2 rutor</button><button type="button" data-preset="kor"><span class="thumb" style="grid-template-columns: 1fr 1fr 1.1fr" aria-hidden="true"><i></i><i></i><i class="run"></i></span>Flöde, kod och körning</button><button type="button" data-preset="schema"><span class="thumb" style="grid-template-columns: 1fr 1fr" aria-hidden="true"><i></i><i></i></span>Schema och förklaring</button></div><h4>Vyer</h4><div class="vyer" role="group" aria-label="Vyer"><button type="button" class="viewtoggle" data-pane="flow" aria-pressed="true">Flöde</button><button type="button" class="viewtoggle" data-pane="class" aria-pressed="true">Klassdiagram</button><button type="button" class="viewtoggle" data-pane="code" aria-pressed="true">Kod</button><button type="button" class="viewtoggle" data-pane="panel" aria-pressed="true">Förklaring</button><button type="button" class="viewtoggle" data-pane="run" aria-pressed="false">Kör</button><button type="button" class="viewtoggle" data-pane="dance" aria-pressed="false">Lyrics</button><button type="button" class="viewtoggle" data-pane="build" aria-pressed="false">Bygget</button></div><p>Eller bygg själv: dra en vy i handtaget ⠿ (eller i dess flik) och släpp den mot en kant av en annan vy, så delas platsen åt det hållet. Släpp i mitten, så byter vyerna plats. Släpp på en vys namnlist, så hamnar vyerna som flikar på samma plats. Dra i skarvarna åt alla håll för att ändra storlek, eller i fyrkanten där två skarvar möts för att ändra bredd och höjd samtidigt. Dance och de andra lägena har var sin layout, och valet sparas i webbläsaren.</p><button type="button" class="layreset" data-preset="aterstall">Återställ allt</button></div></details>
+  <div class="textsize" role="group" aria-label="Textstorlek" title="Textstorlek"><button type="button" id="textminus" aria-label="Mindre text">A−</button><span id="textval">80 %</span><button type="button" id="textplus" aria-label="Större text">A+</button></div>
   <button type="button" class="fullbtn" id="fullbtn" aria-pressed="false" aria-label="Helskärm" title="Hela sidan i helskärm (Esc avslutar)">⛶</button>
   <div class="nav">
     <button id="prev" type="button" title="Föregående ruta (←)" aria-label="Föregående ruta">←</button>
@@ -2728,13 +2739,13 @@ if (typeof module !== 'undefined') module.exports = KK2;
   function presetTree(name, dance) {
     var a = dance ? ['flow', 'dance', 'code', 'panel'] : ['flow', 'class', 'code', 'panel'];
     var third = function () { return dance ? T('build', 'code', 'class') : G('code'); };
-    // Asked for: "new default", the user's own arrangement as the starting layout of Dance: the flow
-    // chart and the class diagram above; Bygget, the code, and Lyrics above the explanation below;
-    // Kör programmet on the right in the full height. In Problem and Lösning it is the same without
-    // Lyrics and Bygget.
+    // Asked for: "new default", the user's own arrangement as the starting layout of Dance: Lyrics and
+    // the explanation above; the flow chart, the class diagram and the code below; Kör programmet
+    // above Bygget on the right. In Problem and Lösning: the explanation above the three drawings and
+    // the code, Kör programmet on the right.
     if (name === 'start') return dance
-      ? S('row', [S('col', [S('row', ['flow', 'class'], [54, 46]), S('row', ['build', 'code', S('col', ['dance', 'panel'], [21, 79])], [38, 36, 26])], [1, 2.3]), 'run'], [83, 17])
-      : S('row', [S('col', [S('row', ['flow', 'class'], [54, 46]), S('row', ['code', 'panel'], [60, 40])], [1, 2.3]), 'run'], [83, 17]);
+      ? S('row', [S('col', [S('row', ['dance', 'panel'], [30, 70]), S('row', ['flow', 'class', 'code'], [34, 34, 32])], [23, 77]), S('col', ['run', 'build'], [38, 62])], [73, 27])
+      : S('row', [S('col', ['panel', S('row', ['flow', 'class', 'code'], [34, 34, 32])], [23, 77]), 'run'], [73, 27]);
     if (name === 'alla') return S('row', [a[0], a[1], third(), a[3]], [32, 24, 22, 22]);
     // Asked for: resizing only the window it belongs to. Grids are built as columns, so moving a
     // divider up or down only changes the windows in that column, not the one next to it.
@@ -2816,8 +2827,11 @@ if (typeof module !== 'undefined') module.exports = KK2;
     if (inDanceView()) layout.dance = t; else layout.normal = t;
   }
 
+  // Asked for: "same zoom as picture". The zoom of each view in the starting layout, as in the
+  // user's picture (the drawings at 100 % show the whole drawing).
+  var START_ZOOM = { flow: 1, 'class': 1, code: 0.67, panel: 0.5, run: 0.5, dance: 0.8, build: 0.5 };
   var layout = { tree: null, normal: presetTree('alla', false), dance: presetTree('start', true), zoom: {} };
-  PANES.forEach(function (p) { layout.zoom[p] = 1; });
+  PANES.forEach(function (p) { layout.zoom[p] = START_ZOOM[p] || 1; });
   try {
     var savedL = JSON.parse(localStorage.getItem('kk2-layout') || 'null');
     if (savedL) {
@@ -2836,8 +2850,8 @@ if (typeof module !== 'undefined') module.exports = KK2;
       // Once (v4), Dance starts from that layout again, and a grid saved as rows in Problem and
       // Lösning becomes columns, looking the same.
       if (!(savedL.v >= 4)) layout.normal = columnsFirst(layout.normal);
-      // Once (v7), Dance starts from the user's chosen starting layout.
-      if (!(savedL.v >= 7)) layout.dance = presetTree('start', true);
+      // Once (v11), Dance starts from the user's chosen starting layout, with its zoom.
+      if (!(savedL.v >= 11)) { layout.dance = presetTree('start', true); PANES.forEach(function (p) { layout.zoom[p] = START_ZOOM[p] || 1; }); }
     } else {
       // A layout saved by the earlier version (one row of views) becomes a row of the new tree.
       var old = JSON.parse(localStorage.getItem('kk2-vyer') || 'null');
@@ -2856,7 +2870,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
   } catch (e) {}
   layout.tree = inDanceView() ? layout.dance : layout.normal;
   function saveLayout() {
-    try { localStorage.setItem('kk2-layout', JSON.stringify({ v: 8, normal: layout.normal, dance: layout.dance, zoom: layout.zoom })); } catch (e) {}
+    try { localStorage.setItem('kk2-layout', JSON.stringify({ v: 11, normal: layout.normal, dance: layout.dance, zoom: layout.zoom })); } catch (e) {}
   }
   // Each view's element, found once: while the layout is drawn a view can sit in a part that is
   // not on the page yet, where looking it up by its id would not find it.
@@ -2955,6 +2969,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
     var now = PANES.filter(paneOn), fresh = now.filter(function (p) { return lastShown.indexOf(p) < 0; });
     lastShown = now;
     fresh.forEach(afterShow);
+    bkPlaced = false;
     var mx = hub.querySelector('.pane.maxed');
     if (mx && !paneOn(mx.getAttribute('data-pane'))) setMaxed(null);
   }
@@ -3095,7 +3110,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
   // Asked for: bigger text. The text size (textScale, chosen at the top, kept in this browser)
   // multiplies every view's own zoom. The bar at the top keeps its size so it does not wrap.
   var TEXT_STEPS = [0.8, 0.9, 1, 1.1, 1.15, 1.25, 1.4, 1.6, 1.8, 2];
-  var textScale = 1.15;
+  var textScale = 0.8;     // asked for: the zoom of the user's picture, text at 80 %
   try { var ts = parseFloat(localStorage.getItem('kk2-text')); if (TEXT_STEPS.indexOf(ts) >= 0) textScale = ts; } catch (e) {}
   function applyText() {
     document.getElementById('textval').textContent = Math.round(textScale * 100) + ' %';
@@ -3294,7 +3309,8 @@ if (typeof module !== 'undefined') module.exports = KK2;
   document.querySelectorAll('[data-preset]').forEach(function (b) {
     b.addEventListener('click', function () {
       var name = b.getAttribute('data-preset');
-      if (name === 'aterstall') { PANES.forEach(function (p) { layout.zoom[p] = 1; }); name = ''; }
+      if (name === 'aterstall') name = '';
+      if (name === '' || name === 'start') PANES.forEach(function (p) { layout.zoom[p] = START_ZOOM[p] || 1; });
       setTree(presetTree(name, inDanceView()));
       applyLayout();
       layMenu.open = false;
@@ -3786,16 +3802,40 @@ if (typeof module !== 'undefined') module.exports = KK2;
     if (line) line.classList.remove('sway-l', 'sway-r');
     beatDots.forEach(function (d) { d.classList.remove('on'); });
     panelDots.forEach(function (d) { d.classList.remove('on'); });
+    document.body.classList.remove('bk', 'bk-one');
+  }
+  // Asked for: "backup dancers utilizing the rest of the static part of the page". In Dance the
+  // things that are not lit dance along, softer than the lit ones: on each beat a small wave runs
+  // through the boxes of the flow chart and the rows of the class diagram, the buttons of the top
+  // bar hop one after the other like a chorus line, and the handles of the views nod; on beat 1
+  // the corners of the views and the divider squares flash purple. Each dancer's place in its wave
+  // (--f) is given when Dance starts and when the views are drawn again.
+  var bkPlaced = false;
+  function bkPlace() {
+    // --f is the place in the wave from 0 (first) to 1 (last), so every wave fits inside one beat.
+    var groups = {};
+    document.querySelectorAll('#chart .node, #classbody .cdm, #classbody .cdc, header button, header .laymenu > summary, .panebar .grip').forEach(function (e) {
+      var g = e.closest('header') ? 'h' : e.classList.contains('grip') ? 'g' : e.closest('#classbody') ? 'c' : 'f';
+      (groups[g] = groups[g] || []).push(e);
+    });
+    Object.keys(groups).forEach(function (g) {
+      groups[g].forEach(function (e, k) { e.style.setProperty('--f', (groups[g].length > 1 ? k / (groups[g].length - 1) : 0).toFixed(3)); });
+    });
+    bkPlaced = true;
   }
   function dancePulse(b) {
     // A bar position of -1 means the analysis could not settle where this beat sits in its bar:
     // the beat still bounces, but it is not shown as beat 1 and no beat mark lights up.
     var pos = DPOS[b];
     hub.style.setProperty('--amp', (0.45 + 0.55 * (DBL[b] || 0)).toFixed(2));
+    document.documentElement.style.setProperty('--amp', (0.45 + 0.55 * (DBL[b] || 0)).toFixed(2));
     var els = document.querySelectorAll(BOP), line = lyricsEl.querySelector('.lyline.now');
     danceStill();
+    if (!bkPlaced) bkPlace();
     void document.body.offsetWidth;    // so the same animation starts again on this beat
     els.forEach(function (e) { e.classList.add(pos === 0 ? 'bop-down' : 'bop'); });
+    document.body.classList.add('bk');
+    if (pos === 0) document.body.classList.add('bk-one');
     if (line) { dSway = -dSway; line.classList.add(dSway > 0 ? 'sway-r' : 'sway-l'); }
     if (pos >= 0) { beatDots[pos].classList.add('on'); panelDots[pos].classList.add('on'); }
     // Asked for: the HUD look, pulsing to the music. The arc reactor kicks and the background
