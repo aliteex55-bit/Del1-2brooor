@@ -420,6 +420,10 @@ body.view-bug .layer.ext { border-left-color: var(--accent); background: var(--a
 .lk { color: var(--muted); font-size: 13px; margin-right: 2px; }
 .fullcode tr { cursor: pointer; }
 .fullcode tr:hover td { background: var(--accent-soft); }
+body.view-dance #codepane > p.what, body.view-dance #codepane .codesel .chips, body.view-dance #codepane .codesel button { display: none; }
+body.view-dance #codepane .codesel { padding: 3px 10px; margin: 0 0 4px; }
+body.view-dance #codepane { scrollbar-gutter: stable; }
+body.view-dance #codepane .codetabs { margin: 2px 0 6px; }
 .bugbtn.rel { box-shadow: 0 0 0 3px var(--mark); }
 .cdc:focus-visible, .cdm:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .cdh { font-size: 16px; margin: 20px 0 6px; }
@@ -2319,6 +2323,117 @@ if (typeof module !== 'undefined') module.exports = KK2;
     codeSelMark();
     try { history.replaceState(null, '', location.pathname + location.search + '#kod-' + file); } catch (e) {}
   }
+  // Asked for: in Dance the Koden view tracks the song, so it is always clear where in the code
+  // the song is ("its out of view"), and "when all code selected zoom out and make the whole thing
+  // more visible". The yellow lines are fitted into the view: a whole class is zoomed out until
+  // all of it is seen, a single line is zoomed in until it is easy to read (but not wider than the
+  // view). The view glides there when the sung line moves on. − and + in the view's bar make the
+  // result bigger or smaller than that fit: in Dance they have their own zoom (100 % = the plain
+  // fit), so a zoom chosen for reading the code in Problem or Lösning does not push it out of view.
+  var codeAnim = 0, CODE_EMIN = 0.02, CODE_EMAX = 1.15;
+  function codeFollowActive() { return inDanceView() && paneOn('code'); }
+  function codeRows(fc) { return fc.querySelectorAll('tr[data-line]'); }
+  // The view's own zoom: screen pixels for one of the view's own (scroll) pixels.
+  function codeK() { var r = codePane.getBoundingClientRect(); return codePane.offsetHeight ? r.height / codePane.offsetHeight : 1; }
+  // A place in the code as a row number with a fraction (0 = the top of the first row), and back.
+  function codeRowAt(rows, y) {
+    var lo = 0, hi = rows.length - 1;
+    while (lo < hi) { var mid = (lo + hi + 1) >> 1; if (rows[mid].getBoundingClientRect().top <= y) lo = mid; else hi = mid - 1; }
+    var r = rows[lo].getBoundingClientRect();
+    return lo + (r.height ? Math.min(1, Math.max(0, (y - r.top) / r.height)) : 0);
+  }
+  function codeYOf(rows, c) {
+    var i = Math.min(rows.length - 1, Math.max(0, Math.floor(c))), r = rows[i].getBoundingClientRect();
+    return r.top + (c - i) * r.height;
+  }
+  // Shows the code at zoom z with row c in the middle of the view.
+  function codePut(fc, rows, z, c) {
+    fc.style.zoom = z;
+    var k = codeK(), cr = codePane.getBoundingClientRect();
+    codePane.scrollTop += (codeYOf(rows, c) - (cr.top + codePane.clientTop * k + codePane.clientHeight * k / 2)) / k;
+    fc.scrollLeft = 0;
+  }
+  // What the view shows now: the file, the zoom and the row in the middle.
+  function codeViewNow() {
+    var fc = codePane.querySelector('.fullcode');
+    if (!fc || !codePane.clientHeight) return null;
+    var rows = codeRows(fc), k = codeK(), cr = codePane.getBoundingClientRect();
+    if (!rows.length) return null;
+    return { file: fc.getAttribute('data-file'), z: parseFloat(fc.style.zoom) || 1, c: codeRowAt(rows, cr.top + codePane.clientTop * k + codePane.clientHeight * k / 2) };
+  }
+  function codeViewH() {
+    var mh = parseFloat(getComputedStyle(codePane).maxHeight);
+    return window.matchMedia && matchMedia('(max-width: 900px)').matches && mh > 0 ? Math.max(codePane.clientHeight, mh) : codePane.clientHeight;
+  }
+  // Where to go: the zoom at which all the yellow lines fit (in height, and the widest of them in
+  // width), and the row to put in the middle. When even the smallest zoom is too big for them,
+  // their first line goes to the top of the view instead.
+  function codeTarget(fc, rows) {
+    var lit = fc.querySelectorAll('tr.blk');
+    if (!lit.length) return null;
+    var z0 = parseFloat(fc.style.zoom) || 1, k = codeK();
+    var i0 = +lit[0].getAttribute('data-line') - 1, i1 = +lit[lit.length - 1].getAttribute('data-line');
+    var a = lit[0].getBoundingClientRect(), b = lit[lit.length - 1].getBoundingClientRect();
+    var blockH = (b.bottom - a.top) / z0, rowH = a.height / z0;
+    var left = fc.getBoundingClientRect().left, w = 0, rg = document.createRange();
+    Array.prototype.forEach.call(lit, function (tr) {
+      rg.selectNodeContents(tr.lastElementChild);
+      var q = rg.getBoundingClientRect();
+      if (q.width) w = Math.max(w, q.right - left);
+    });
+    w = w / z0 + 16;                                    // the cell's padding on the right
+    var vh = codeViewH(), availH = vh * k - 24, availW = fc.getBoundingClientRect().width - 6;
+    if (!(blockH > 0) || availH <= 0 || availW <= 0) return null;
+    var fit = Math.min(availH / blockH, w > 16 ? availW / w : Infinity);
+    var e = Math.min(CODE_EMAX, Math.max(CODE_EMIN, fit * k));
+    var z = e / k * (layout && layout.zoom.codeDance || 1);
+    var c = blockH * z <= availH + 0.5 ? (i0 + i1) / 2 : i0 + (vh * k / 2 - 12) / (rowH * z);
+    return { z: z, c: c };
+  }
+  // Fits the yellow lines into the view; prev (what the view showed before) makes it glide from there.
+  function codeFollow(prev, animate) {
+    cancelAnimationFrame(codeAnim);
+    codeAnim = 0;
+    var fc = codePane.querySelector('.fullcode');
+    if (!fc || !codePane.clientHeight) return;
+    var rows = codeRows(fc), t = rows.length && codeTarget(fc, rows);
+    if (!t) return;                                     // nothing yellow in this file: the view stays
+    var from = prev && prev.file === fc.getAttribute('data-file') ? prev : null;
+    if (!animate || !from || document.hidden || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+      var now = codeViewNow();
+      if (now && Math.abs(now.z - t.z) < 0.005 && Math.abs(now.c - t.c) < 0.05) return;
+      codePut(fc, rows, t.z, t.c);
+      return;
+    }
+    var start = performance.now(), size0 = codePane.clientWidth + 'x' + codePane.clientHeight;
+    function step(now) {
+      var q = Math.min(1, (now - start) / 420), e = q < 0.5 ? 2 * q * q : 1 - Math.pow(-2 * q + 2, 2) / 2;
+      codePut(fc, rows, from.z + (t.z - from.z) * e, from.c + (t.c - from.c) * e);
+      if (q < 1) { codeAnim = requestAnimationFrame(step); return; }
+      codeAnim = 0;
+      if (codePane.clientWidth + 'x' + codePane.clientHeight !== size0) codeFollow(null, false);
+    }
+    codeAnim = requestAnimationFrame(step);
+  }
+  // Dance on: fit the code; Dance off: the code at its normal size again.
+  function codeFollowView(on) {
+    cancelAnimationFrame(codeAnim);
+    codeAnim = 0;
+    if (on) { if (codeFollowActive()) codeFollow(null, false); return; }
+    var fc = codePane.querySelector('.fullcode');
+    if (fc && fc.style.zoom) { fc.style.zoom = ''; refreshCode(true); }
+  }
+  // The view changes size (a divider, the window, full screen): fit again.
+  if (window.ResizeObserver) (function () {
+    var size = '';
+    new ResizeObserver(function () {
+      var now = codePane.clientWidth + 'x' + codePane.clientHeight;
+      if (now === size) return;
+      size = now;
+      if (codeAnim) return;                             // a glide fits again at its end
+      if (codePane.clientHeight && codeFollowActive()) codeFollow(null, false);
+    }).observe(codePane);
+  })();
   // Draws the full code of one file into the Koden view or the explanation view, with the focus
   // in yellow, and scrolls to its first line (or keeps the place, after a click on a line).
   function renderCode(target, file, keepScroll) {
@@ -2361,14 +2476,26 @@ if (typeof module !== 'undefined') module.exports = KK2;
       });
       h += '</table></div>';
     }
-    var keepTop = target.scrollTop;
+    var keepTop = target.scrollTop, follow = inPane && codeFollowActive(), prev = follow ? codeViewNow() : null;
+    cancelAnimationFrame(codeAnim);
+    codeAnim = 0;
     target.innerHTML = h;
+    if (follow) {
+      // In Dance: the same place and zoom as before for a moment, then the glide to the yellow lines.
+      var fc = target.querySelector('.fullcode'), same = !!(fc && prev && prev.file === file);
+      if (same) codePut(fc, codeRows(fc), prev.z, prev.c); else target.scrollTop = keepScroll ? keepTop : 0;
+      if (!keepScroll) codeFollow(same ? prev : null, true);
+      return;
+    }
     if (keepScroll) { target.scrollTop = keepTop; return; }
     target.scrollTop = 0;
-    // Scroll the code so the first yellow line is in view.
+    // Scroll the code so the first yellow line is in view. The view can be zoomed: k converts the
+    // screen's pixels into the view's own scroll pixels (without it, it scrolled too short and the
+    // yellow lines could end up under the view).
     var tr = first && target.querySelector('tr[data-line="' + first + '"]');
     if (tr) {
-      if (target.scrollHeight > target.clientHeight + 1) target.scrollTop += tr.getBoundingClientRect().top - target.getBoundingClientRect().top - 140;
+      var tb = target.getBoundingClientRect(), k = target.offsetHeight ? tb.height / target.offsetHeight : 1;
+      if (target.scrollHeight > target.clientHeight + 1) target.scrollTop += (tr.getBoundingClientRect().top - tb.top) / k - 140;
       else tr.scrollIntoView({ block: 'center' });
     }
   }
@@ -2888,12 +3015,14 @@ if (typeof module !== 'undefined') module.exports = KK2;
   var START_ZOOM = { flow: 1, 'class': 1, code: 0.67, panel: 1, run: 0.5, dance: 0.8, build: 0.5 };
   var layout = { tree: null, normal: presetTree('alla', false), dance: presetTree('start', true), zoom: {} };
   PANES.forEach(function (p) { layout.zoom[p] = START_ZOOM[p] || 1; });
+  layout.zoom.codeDance = 1;
   try {
     var savedL = JSON.parse(localStorage.getItem('kk2-layout') || 'null');
     if (savedL) {
       if (validTree(savedL.normal)) layout.normal = savedL.normal;
       if (validTree(savedL.dance)) layout.dance = savedL.dance;
       if (savedL.zoom) PANES.forEach(function (p) { if (ZOOMS.indexOf(savedL.zoom[p]) >= 0) layout.zoom[p] = savedL.zoom[p]; });
+      if (savedL.zoom && ZOOMS.indexOf(savedL.zoom.codeDance) >= 0) layout.zoom.codeDance = savedL.zoom.codeDance;
       // Once (v8): the drawings start at 100 %, which now shows the whole drawing.
       if (!(savedL.v >= 8)) { layout.zoom.flow = 1; layout.zoom['class'] = 1; }
       // Once (v13): the explanation starts at 100 %, which in Dance now fills its view.
@@ -3077,7 +3206,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
   addEventListener('resize', function () { buildCorners(); });
   function afterShow(p) {
     if (p === 'dance' && typeof lyricsEl !== 'undefined' && lyricsEl) { var ln = lyricsEl.querySelector('.lyline.now'); if (ln) danceScrollTo(ln); }
-    if (p === 'code' && codeStale) refreshCode();
+    if (p === 'code') { if (codeStale) refreshCode(); else if (codeFollowActive()) codeFollow(null, false); }
     if (p === 'run') ensureRun();
     if (p === 'build' && bLast) { bLastActive = null; bLast.bvsterm = null; buildTick(dAudio.currentTime); }
   }
@@ -3294,7 +3423,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
   }
   function applyZoom(p) {
     var el = paneEl(p), own = layout.zoom[p] || 1, z = own * textScale, body = el.querySelector('.panebody');
-    el.querySelector('.zoomval').textContent = Math.round(own * 100) + ' %';
+    el.querySelector('.zoomval').textContent = Math.round((layout.zoom[zoomKey(p)] || 1) * 100) + ' %';
     if (p === 'flow' && typeof followActive === 'function' && followBtn && followActive()) { followApply(false); return; }
     if (p === 'flow' && followAnim) { cancelAnimationFrame(followAnim); followAnim = 0; }   // following stopped
     if (p === 'flow' || p === 'class') {
@@ -3314,13 +3443,16 @@ if (typeof module !== 'undefined') module.exports = KK2;
       var card = p === 'panel' && body.querySelector('.dexp');
       if (card && body.clientHeight) cardFit(body, card);
       body.style.zoom = z;
+      if (p === 'code' && typeof codeFollowActive === 'function' && codeFollowActive()) codeFollow(null, false);
     }
   }
+  // The zoom a view's −, + and ⟲ change: the code view in Dance has its own.
+  function zoomKey(p) { return p === 'code' && inDanceView() ? 'codeDance' : p; }
   function zoomPane(p, dir) {
-    var z = layout.zoom[p] || 1, next = 1;
+    var key = zoomKey(p), z = layout.zoom[key] || 1, next = 1;
     if (dir > 0) next = ZOOMS.filter(function (x) { return x > z + 0.001; })[0] || z;
     if (dir < 0) next = ZOOMS.filter(function (x) { return x < z - 0.001; }).pop() || z;
-    layout.zoom[p] = next;
+    layout.zoom[key] = next;
     applyZoom(p);
     saveLayout();
   }
@@ -3473,7 +3605,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
     b.addEventListener('click', function () {
       var name = b.getAttribute('data-preset');
       if (name === 'aterstall') name = '';
-      if (name === '' || name === 'start') PANES.forEach(function (p) { layout.zoom[p] = START_ZOOM[p] || 1; });
+      if (name === '' || name === 'start') { PANES.forEach(function (p) { layout.zoom[p] = START_ZOOM[p] || 1; }); layout.zoom.codeDance = 1; }
       setTree(presetTree(name, inDanceView()));
       applyLayout();
       layMenu.open = false;
@@ -4340,6 +4472,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
     }
     if (changed) applyLayout();
     if (layout) applyZoom('flow');
+    if (layout) { applyZoom('code'); codeFollowView(on); }
   }
 
   // Asked for: a view that codes and builds the whole program in an imitation of VS Code, mapped to
