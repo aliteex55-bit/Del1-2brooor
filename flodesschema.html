@@ -318,7 +318,8 @@ body.view-dance .pbeats { display: flex; }
 .proot { flex: 1; }
 .psplit, .pgroup { display: flex; min-width: 0; min-height: 0; }
 .pgroup { position: relative; }
-.corner { position: absolute; right: -8px; bottom: -8px; z-index: 6; width: 16px; height: 16px; border-radius: 3px; background: var(--accent); opacity: .55; cursor: nwse-resize; touch-action: none; }
+.corner { position: absolute; z-index: 6; width: 14px; height: 14px; border-radius: 3px; background: var(--accent); opacity: .55; cursor: nwse-resize; touch-action: none; }
+.corner.br { right: -10.5px; bottom: -10.5px; } .corner.bl { left: -10.5px; bottom: -10.5px; } .corner.tr { right: -10.5px; top: -10.5px; } .corner.tl { left: -10.5px; top: -10.5px; }
 .corner:hover, .corner.drag, .corner:focus-visible { opacity: 1; outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
 .psplit.row { flex-direction: row; }
 .psplit.col, .pgroup { flex-direction: column; }
@@ -571,6 +572,8 @@ ul.pts .ln-no { font-family: Consolas, monospace; color: var(--accent); font-wei
 @keyframes hudcore { 0% { filter: brightness(1.7); } 100% { filter: brightness(1); } }
 /* The player in the top bar (asked for: the play button and the circle up above, away from the lyrics) */
 :root[data-theme="dark"] body .hudplayer { padding: 0 6px; border-left: 1px solid var(--hud-dim); }
+:root:not([data-theme="dark"]) .hudplayer { background: #03111e; border-radius: 10px; padding: 2px 12px; }
+:root:not([data-theme="dark"]) .hudplayer .hudread { color: #9fb3c8; }
 .hudread { display: grid; grid-template-columns: auto auto; justify-content: start; gap: 0 10px; font-size: 10.5px; letter-spacing: .2em; color: var(--muted); text-transform: uppercase; }
 .hudread b { font: 700 16px "Cascadia Mono", Consolas, monospace; letter-spacing: 0; color: #62f3ff; text-shadow: 0 0 10px #62f3ff; }
 #hudnet { position: fixed; inset: 0; z-index: 0; pointer-events: none; display: none; }
@@ -1936,7 +1939,8 @@ if (typeof module !== 'undefined') module.exports = KK2;
   // the solution view; otherwise the last choice in this browser, or Problem.
   function setView(v) {
     // Asked for: Dance. The song is about the code as it is now, so Dance shows the code now, like
-    // Lösning, and also the Dance view with the song and the lyrics.
+    // Lösning. The player is in the top bar, and the Dance layout (with the Lyrics view if it has it)
+    // comes in.
     var fix = v === 'fix' || v === 'dance';
     document.body.classList.toggle('view-fix', fix);
     document.body.classList.toggle('view-bug', !fix);
@@ -2692,7 +2696,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
     return { t: 's', d: d, c: c.map(function (x) { return typeof x === 'string' ? G(x) : x; }), w: w || c.map(function () { return 1; }) };
   }
   function T() { var ps = [].slice.call(arguments); return { t: 'g', p: ps, a: ps[0] }; }
-  // The ready layouts. In Dance the song takes the class diagram's place, and Bygget (the code
+  // The ready layouts. In Dance the Lyrics view takes the class diagram's place, and Bygget (the code
   // being written to the song) is the first tab where the code is, with the code and the class
   // diagram as tabs behind it.
   function presetTree(name, dance) {
@@ -2703,7 +2707,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
     if (name === '3+1') return S('col', [S('row', [a[0], a[1], third()]), a[3]], [1.7, 1]);
     if (name === '1+3') return S('row', [a[0], S('col', [a[1], third(), a[3]])], [1.3, 1]);
     // Asked for: a layout with two views above, two below and two at the bottom, and one with six
-    // views side by side. Six views: in Dance the song, Bygget, the code, the class diagram and the
+    // views side by side. Six views: in Dance the lyrics, Bygget, the code, the class diagram and the
     // explanation beside the flow chart; otherwise the flow chart, the class diagram, the code, the
     // explanation, Kör and Bygget.
     var six = dance ? ['flow', 'dance', 'build', 'code', 'class', 'panel'] : ['flow', 'class', 'code', 'panel', 'run', 'build'];
@@ -2872,7 +2876,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
     if (!layout.tree) setTree(G('panel'));
     // Moving the views around must not lose where each one was scrolled to.
     PANES.forEach(function (p) {
-      if (paneEl(p).offsetParent) scrollMem[p] = scrollersOf(p).map(function (b) { return [b.scrollTop, b.scrollLeft]; });
+      if (paneEl(p).getClientRects().length) scrollMem[p] = scrollersOf(p).map(function (b) { return [b.scrollTop, b.scrollLeft]; });
     });
     Array.prototype.slice.call(hub.querySelectorAll('.ptabs')).forEach(function (t) { t.parentNode.removeChild(t); });
     PANES.forEach(function (p) { var el = paneEl(p); el.classList.remove('intabs'); paneStore.appendChild(el); });
@@ -2882,32 +2886,10 @@ if (typeof module !== 'undefined') module.exports = KK2;
     var root = buildNode(layout.tree);
     root.classList.add('proot');
     hub.insertBefore(root, paneStore);
-    // Asked for: one handle that changes the size both ways, "i en kvadrat". Where the divider beside
-    // a view (to its right) meets the divider under it, the view gets a small square at its corner.
-    Array.prototype.slice.call(root.querySelectorAll('.pgroup')).forEach(function (g) {
-      var sx = null, sy = null, x = g;
-      while (x.parentNode && x.parentNode.classList && x.parentNode.classList.contains('psplit') && !(sx && sy)) {
-        var par = x.parentNode, nx = x.nextElementSibling;
-        if (nx && nx.classList.contains('splitter')) {
-          if (par.classList.contains('row') && !sx) sx = nx;
-          if (par.classList.contains('col') && !sy) sy = nx;
-        }
-        x = par;
-      }
-      if (!sx || !sy) return;
-      var c = document.createElement('div');
-      c.className = 'corner';
-      c.tabIndex = 0;
-      c.setAttribute('role', 'button');
-      c.setAttribute('aria-label', 'Ändra bredd och höjd samtidigt (dra, eller pilarna åt alla håll)');
-      c.title = 'Dra för att ändra bredd och höjd samtidigt';
-      c.setAttribute('data-sx', sx.getAttribute('data-split'));
-      c.setAttribute('data-sy', sy.getAttribute('data-split'));
-      g.appendChild(c);
-    });
+    buildCorners();
     PANES.forEach(function (p) {
       var m = scrollMem[p];
-      if (m && paneEl(p).offsetParent) scrollersOf(p).forEach(function (b, k) { if (m[k]) { b.scrollTop = m[k][0]; b.scrollLeft = m[k][1]; } });
+      if (m && paneEl(p).getClientRects().length) scrollersOf(p).forEach(function (b, k) { if (m[k]) { b.scrollTop = m[k][0]; b.scrollLeft = m[k][1]; } });
     });
     document.querySelectorAll('.viewtoggle').forEach(function (b) { b.setAttribute('aria-pressed', String(inLayout(b.getAttribute('data-pane')))); });
     document.getElementById('runbtn').classList.toggle('on', inLayout('run'));
@@ -2918,8 +2900,49 @@ if (typeof module !== 'undefined') module.exports = KK2;
     var now = PANES.filter(paneOn), fresh = now.filter(function (p) { return lastShown.indexOf(p) < 0; });
     lastShown = now;
     fresh.forEach(afterShow);
+    var mx = hub.querySelector('.pane.maxed');
+    if (mx && !paneOn(mx.getAttribute('data-pane'))) setMaxed(null);
+  }
+  // Asked for: one handle that changes the size both ways, "i en kvadrat". Wherever a divider between
+  // views side by side meets a divider between views above each other, a small square sits in the
+  // middle of the two; dragging it moves both. Where dividers meet in a cross, one square moves all
+  // of them. The squares are made again after the layout or a divider changes.
+  function buildCorners() {
+    Array.prototype.slice.call(hub.querySelectorAll('.corner')).forEach(function (c) { c.parentNode.removeChild(c); });
+    var junctions = {}, order = [];
+    Array.prototype.slice.call(hub.querySelectorAll('.proot .pgroup, .pgroup.proot')).forEach(function (g) {
+      var side = {}, x = g;
+      while (x.parentNode && x.parentNode.classList && x.parentNode.classList.contains('psplit')) {
+        var par = x.parentNode, row = par.classList.contains('row'), nx = x.nextElementSibling, pv = x.previousElementSibling;
+        if (nx && nx.classList.contains('splitter') && !side[row ? 'right' : 'bottom']) side[row ? 'right' : 'bottom'] = nx;
+        if (pv && pv.classList.contains('splitter') && !side[row ? 'left' : 'top']) side[row ? 'left' : 'top'] = pv;
+        x = par;
+      }
+      [['right', 'bottom'], ['left', 'bottom'], ['right', 'top'], ['left', 'top']].forEach(function (k) {
+        var v = side[k[0]], h = side[k[1]];
+        if (!v || !h) return;
+        var vr = v.getBoundingClientRect(), hr = h.getBoundingClientRect();
+        var cx = vr.left + vr.width / 2, cy = hr.top + hr.height / 2, key = Math.round(cx / 6) + ',' + Math.round(cy / 6);
+        var j = junctions[key];
+        if (!j) { j = junctions[key] = { g: g, at: (k[1] === 'top' ? 't' : 'b') + (k[0] === 'left' ? 'l' : 'r'), sx: [], sy: [] }; order.push(j); }
+        if (j.sx.indexOf(v) < 0) j.sx.push(v);
+        if (j.sy.indexOf(h) < 0) j.sy.push(h);
+      });
+    });
+    order.forEach(function (j) {
+      var c = document.createElement('div');
+      c.className = 'corner ' + j.at;
+      c.tabIndex = 0;
+      c.setAttribute('role', 'button');
+      c.setAttribute('aria-label', 'Ändra bredd och höjd samtidigt (dra, eller pilarna åt alla håll)');
+      c.title = 'Dra för att ändra bredd och höjd samtidigt';
+      c.setAttribute('data-sx', j.sx.map(function (e) { return e.getAttribute('data-split'); }).join(','));
+      c.setAttribute('data-sy', j.sy.map(function (e) { return e.getAttribute('data-split'); }).join(','));
+      j.g.appendChild(c);
+    });
   }
   function afterShow(p) {
+    if (p === 'dance' && typeof lyricsEl !== 'undefined' && lyricsEl) { var ln = lyricsEl.querySelector('.lyline.now'); if (ln) danceScrollTo(ln); }
     if (p === 'code' && codeStale) refreshCode();
     if (p === 'run') ensureRun();
     if (p === 'build' && bLast) { bLastActive = null; bLast.bvsterm = null; buildTick(dAudio.currentTime); }
@@ -2927,8 +2950,10 @@ if (typeof module !== 'undefined') module.exports = KK2;
   function activate(p) {
     var r = groupOf(layout.tree, p);
     if (!r) return;
+    var wasFull = r.g.a !== p && fullEl() === paneEl(r.g.a);
     r.g.a = p;
     applyLayout();
+    if (wasFull) goFull(paneEl(p));
   }
   // After a tab is chosen from the keyboard, the focus stays on that tab (the tabs are drawn anew).
   function focusTab(p) {
@@ -2949,7 +2974,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
   function showPane(p, on, quiet) {
     // The Lyrics view belongs to Dance: showing it in Problem or Lösning chooses Dance. Hiding it
     // leaves the song playing, since the player is in the top bar.
-    if (on && p === 'dance' && !inDanceView()) { setView('dance'); return; }
+    if (on && p === 'dance' && !inDanceView()) setView('dance');
     var r = groupOf(layout.tree, p);
     if (on) {
       if (r) r.g.a = p; else addToTree(p);
@@ -3108,9 +3133,13 @@ if (typeof module !== 'undefined') module.exports = KK2;
     var f = el.requestFullscreen || el.webkitRequestFullscreen, pane = el.classList.contains('pane');
     if (!f) { if (pane) setMaxed(el); return; }
     var r = f.call(el), answered = false;
-    if (r && r.then) r.then(function () { answered = true; }, function () { answered = true; if (pane) setMaxed(el); });
-    // Some apps never answer the request: then the view covers the window after a moment.
-    setTimeout(function () { if (pane && !answered && !document.fullscreenElement && !document.webkitFullscreenElement) setMaxed(el); }, 800);
+    function fallback() {
+      if (pane) { if (paneOn(el.getAttribute('data-pane'))) setMaxed(el); }
+      else document.body.classList.add('nofull');     // the page cannot go full screen here
+    }
+    if (r && r.then) r.then(function () { answered = true; }, function () { answered = true; fallback(); });
+    // Some apps never answer the request: then the fallback after a moment.
+    setTimeout(function () { if (!answered && !document.fullscreenElement && !document.webkitFullscreenElement) fallback(); }, 800);
   }
   function leaveFull() {
     if (maxedPane()) { setMaxed(null); return; }
@@ -3119,12 +3148,14 @@ if (typeof module !== 'undefined') module.exports = KK2;
     var r = f.call(document);
     if (r && r.catch) r.catch(function () {});
   }
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && maxedPane()) setMaxed(null); });
-  if (!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen)) document.body.classList.add('nofull');
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && maxedPane()) { e.stopPropagation(); setMaxed(null); } }, true);
+  if (!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) ||
+      document.fullscreenEnabled === false || (document.fullscreenEnabled === undefined && document.webkitFullscreenEnabled === false)) document.body.classList.add('nofull');
   fullBtn.addEventListener('click', function () { if (fullEl()) leaveFull(); else goFull(document.documentElement); });
   function fullChanged() {
     var m = maxedPane();
     if (m && (document.fullscreenElement || document.webkitFullscreenElement)) { m.classList.remove('maxed'); document.body.classList.remove('maxing'); }
+    if (document.fullscreenElement || document.webkitFullscreenElement) document.body.classList.remove('nofull');
     var f = fullEl(), page = f === document.documentElement;
     fullBtn.textContent = page ? '⛶ Avsluta helskärm' : '⛶ Helskärm';
     fullBtn.setAttribute('aria-pressed', String(page));
@@ -3135,6 +3166,23 @@ if (typeof module !== 'undefined') module.exports = KK2;
     });
     PANES.forEach(applyZoom);
   }
+  if (window.ResizeObserver) ['chart', 'classbody'].forEach(function (id) {
+    var b = document.getElementById(id), size = '', cx = 0.5, cy = 0;
+    function centre() {
+      cx = b.scrollWidth ? (b.scrollLeft + b.clientWidth / 2) / b.scrollWidth : 0.5;
+      cy = b.scrollHeight ? (b.scrollTop + b.clientHeight / 2) / b.scrollHeight : 0;
+    }
+    b.addEventListener('scroll', function () { if (b.clientWidth + 'x' + b.clientHeight === size) centre(); });
+    new ResizeObserver(function () {
+      var now = b.clientWidth + 'x' + b.clientHeight, first = !size;
+      if (now === size) return;
+      size = now;
+      if (!b.clientWidth) return;                       // hidden: keep the middle for later
+      if (first) { centre(); return; }
+      b.scrollLeft = cx * b.scrollWidth - b.clientWidth / 2;
+      b.scrollTop = cy * b.scrollHeight - b.clientHeight / 2;
+    }).observe(b);
+  });
   document.addEventListener('fullscreenchange', fullChanged);
   document.addEventListener('webkitfullscreenchange', fullChanged);
   // The Layout menu at the top: the ready layouts, each view on or off, and a reset. It opens under
@@ -3192,7 +3240,9 @@ if (typeof module !== 'undefined') module.exports = KK2;
     s.nextElementSibling.style.flex = n.w[i + 1] + ' 1 0px';
     s.setAttribute('aria-valuenow', String(Math.round(100 * n.w[i] / sum)));
   }
-  function splitOf(c, axis) { return hub.querySelector('.splitter[data-split="' + c.getAttribute('data-' + axis) + '"]'); }
+  function splitOf(c, axis) {
+    return c.getAttribute('data-' + axis).split(',').map(function (i) { return hub.querySelector('.splitter[data-split="' + i + '"]'); }).filter(Boolean);
+  }
   hub.addEventListener('pointerdown', function (e) {
     var s = e.target.closest('.splitter'), c = !s && e.target.closest('.corner');
     if (!s && !c) return;
@@ -3204,8 +3254,8 @@ if (typeof module !== 'undefined') module.exports = KK2;
     } else {
       // The corner square: the divider beside the view follows the pointer sideways and the
       // divider under it follows it up and down, both at once.
-      moves.push([splitDrag(splitOf(c, 'sx'), e.clientX), true]);
-      moves.push([splitDrag(splitOf(c, 'sy'), e.clientY), false]);
+      splitOf(c, 'sx').forEach(function (v) { moves.push([splitDrag(v, e.clientX), true]); });
+      splitOf(c, 'sy').forEach(function (h) { moves.push([splitDrag(h, e.clientY), false]); });
     }
     el.classList.add('drag');
     function move(ev) { moves.forEach(function (m) { m[0](m[1] ? ev.clientX : ev.clientY); }); }
@@ -3215,6 +3265,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
       document.removeEventListener('pointercancel', up);
       el.classList.remove('drag');
       saveLayout();
+      buildCorners();
     }
     document.addEventListener('pointermove', move);
     document.addEventListener('pointerup', up);
@@ -3233,8 +3284,9 @@ if (typeof module !== 'undefined') module.exports = KK2;
     } else return;
     e.preventDefault();
     e.stopPropagation();
-    splitKey(d[0], d[1]);
+    (Array.isArray(d[0]) ? d[0] : [d[0]]).forEach(function (x) { splitKey(x, d[1]); });
     saveLayout();
+    if (s) buildCorners();
   });
   // Dragging a view by its handle (⠿) or its tab: a frame shows where it will land, Escape cancels.
   var dockHint = document.createElement('div'), dragGhost = document.createElement('div');
