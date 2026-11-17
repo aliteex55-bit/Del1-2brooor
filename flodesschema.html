@@ -2074,7 +2074,8 @@ if (typeof module !== 'undefined') module.exports = KK2;
   // Asked for: the page starts in Dance and the song plays by itself. Asked for next: it always
   // starts in Dance ("öppna i dance läget direkt som tidigare"), also when the address still has a
   // #... part from a box or a view opened earlier (that part used to open Problem). What the #...
-  // names is still opened, and shown again when Dance is left. ?vy= picks a view.
+  // names waits while the page starts in Dance, and is opened when Dance is left (dHashWaits).
+  // ?vy= picks a view.
   var view = 'dance';
   var asked = (location.search.match(/[?&]vy=([a-z]+)/) || [])[1];
   if (asked === 'losning') view = 'fix';
@@ -2365,7 +2366,17 @@ if (typeof module !== 'undefined') module.exports = KK2;
     if (!fc || !codePane.clientHeight) return null;
     var rows = codeRows(fc), k = codeK(), cr = codePane.getBoundingClientRect();
     if (!rows.length) return null;
-    return { file: fc.getAttribute('data-file'), z: parseFloat(fc.style.zoom) || 1, c: codeRowAt(rows, cr.top + codePane.clientTop * k + codePane.clientHeight * k / 2) };
+    var y = cr.top + codePane.clientTop * k + codePane.clientHeight * k / 2, lines = fc.querySelectorAll('tr[data-line]'), line = 0;
+    if (lines.length) {
+      var li = codeRowAt(lines, y), at = lines[Math.min(lines.length - 1, Math.floor(li))];
+      line = +at.getAttribute('data-line') + (li - Math.floor(li));
+    }
+    return { file: fc.getAttribute('data-file'), z: parseFloat(fc.style.zoom) || 1, c: codeRowAt(rows, y), line: line };
+  }
+  // The row (lyric rows counted) of a code line with a fraction, in this table.
+  function codeRowOfLine(fc, rows, line) {
+    var at = line ? fc.querySelector('tr[data-line="' + Math.floor(line) + '"]') : null;
+    return at ? Array.prototype.indexOf.call(rows, at) + (line - Math.floor(line)) : null;
   }
   function codeViewH() {
     var mh = parseFloat(getComputedStyle(codePane).maxHeight);
@@ -2436,14 +2447,15 @@ if (typeof module !== 'undefined') module.exports = KK2;
     var on = (dance === undefined ? inDanceView() : dance) && typeof BEV !== 'undefined' && BEV && BEV.length && BEV[0].show &&
       typeof dAudio !== 'undefined' && dAudio;
     var file = fc.getAttribute('data-file'), n = 0, t = on ? dAudio.currentTime : 0;
-    if (on) while (n < BEV.length && BEV[n].t <= t) n++;
+    if (on) while (n < BEV.length && BEV[n].ft <= t) n++;
     var key = on ? file + '|' + n : '';
     if (!force && key === cLyrKey) return false;
     cLyrKey = key;
+    var keep = force ? null : codeViewNow();              // new rows in place: the same code stays in view
     Array.prototype.slice.call(fc.querySelectorAll('tr.clens')).forEach(function (r) { r.parentNode.removeChild(r); });
     if (!on) return true;
     var at = {};
-    for (var k = 0; k < n; k++) { var a = bAnchor(BEV[k], file); if (a) (at[a.n] = at[a.n] || []).push(k); }
+    for (var k = 0; k < n; k++) { var a = cAnchor(BEV[k], file); if (a) (at[a.n] = at[a.n] || []).push(k); }
     Object.keys(at).forEach(function (ln) {
       var tr = fc.querySelector('tr[data-line="' + ln + '"]'), seen = {}, order = [];
       if (!tr) return;
@@ -2465,6 +2477,10 @@ if (typeof module !== 'undefined') module.exports = KK2;
         tr.parentNode.insertBefore(row, tr);
       });
     });
+    if (keep && keep.line) {
+      var rows1 = codeRows(fc), c1 = codeRowOfLine(fc, rows1, keep.line);
+      if (c1 !== null) codePut(fc, rows1, keep.z, c1);
+    }
     return true;
   }
   // Dance on: fit the code; Dance off: the code at its normal size again.
@@ -2537,7 +2553,11 @@ if (typeof module !== 'undefined') module.exports = KK2;
     if (follow) {
       // In Dance: the same place and zoom as before for a moment, then the glide to the yellow lines.
       var fc = target.querySelector('.fullcode'), same = !!(fc && prev && prev.file === file);
-      if (same) codePut(fc, codeRows(fc), prev.z, prev.c); else target.scrollTop = keepScroll ? keepTop : 0;
+      if (same) {
+        var rows0 = codeRows(fc), c0 = codeRowOfLine(fc, rows0, prev.line);
+        if (c0 !== null) prev.c = c0;
+        codePut(fc, rows0, prev.z, prev.c);
+      } else target.scrollTop = keepScroll ? keepTop : 0;
       if (!keepScroll) codeFollow(same ? prev : null, true);
       return;
     }
@@ -4447,6 +4467,14 @@ if (typeof module !== 'undefined') module.exports = KK2;
   // chosen box stay as they are, a click on a box still shows that box until the song reaches the
   // next line, and leaving Dance brings back what the explanation showed before.
   var dCardKey = null, dPanelBefore = null, LAYER_TEXT = {};
+  // Asked for: check two review findings about a page opened with an address that names something
+  // (#...), and fix them if they are real. Both were real. The view the address names was opened
+  // under Dance when the page started: it stood in place of the intro card, with its box and its
+  // Fel button lit all through Dance, and once the song had drawn a card, leaving Dance brought
+  // back the plain start text instead of that view. Now the address waits while the page starts in
+  // Dance (dHashWaits holds it): Dance starts exactly as it does without an address, and the view
+  // is opened when Dance is left, unless something else has been opened since.
+  var dHashWaits = '';
   DATA.bugs.concat(DATA.exts).forEach(function (b) { b.layers.forEach(function (L) { LAYER_TEXT[L.label] = L; }); });
   function dChips(labels) {
     return labels.map(function (l) { return '<span class="dchip' + (l.charAt(0) === 'U' ? ' ext' : '') + '">' + esc(l) + '</span>'; }).join('');
@@ -4524,18 +4552,21 @@ if (typeof module !== 'undefined') module.exports = KK2;
     cardSplit(panel.querySelector('.dexp'));
     applyZoom('panel');
   }
+  // Says whether the explanation shows what it showed before Dance again (and not something that
+  // was opened during Dance).
   function danceCardClose() {
     var before = dPanelBefore;
     dPanelBefore = null;
     dCardKey = null;
     dCardLine = -1;
-    if (!before) return;
+    if (!before) return true;
     panel.setAttribute('aria-live', 'polite');
-    if (!panel.querySelector('.dexp')) return;                 // the user's own choice is showing
-    if (location.hash !== before.hash && routeHash()) return;  // opened during Dance: show it again
+    if (!panel.querySelector('.dexp')) return false;                 // the user's own choice is showing
+    if (location.hash !== before.hash && routeHash()) return false;  // opened during Dance: show it again
     panel.innerHTML = before.html;
     panel.className = before.cls;
     applyZoom('panel');
+    return true;
   }
   function danceLineChanged(i) { danceApply(danceTargetAt(i, 0)); danceCard(i); }
   function danceWordChanged(i, w) { danceApply(danceTargetAt(i, w)); danceCard(i); danceCardWords(i, w); }
@@ -4576,8 +4607,9 @@ if (typeof module !== 'undefined') module.exports = KK2;
   // layout of Problem and Lösning, which has no Lyrics view.
   function danceViewChanged(on) {
     if (!layout) return;
+    var back = false;
     if (on) { dCardKey = null; dCardLine = -1; if (dLine >= 0) danceCard(dLine); else danceCardIntro(); }
-    else danceCardClose();
+    else back = danceCardClose();
     var want = on ? layout.dance : layout.normal, changed = layout.tree !== want;
     layout.tree = want;
     if (!on) {
@@ -4592,6 +4624,14 @@ if (typeof module !== 'undefined') module.exports = KK2;
     if (changed) applyLayout();
     if (layout) { applyZoom('flow'); applyZoom('class'); }
     if (layout) { applyZoom('code'); codeFollowView(on); }
+    // Dance is left: the view named by the address the page was opened with (it waited, see
+    // dHashWaits) is opened now, with the layout of Problem and Lösning in place, as when the page
+    // is opened in one of them. Not when something else has been opened since.
+    if (!on) {
+      var waited = dHashWaits;
+      dHashWaits = '';
+      if (waited && back && location.hash === waited) routeHash();
+    }
   }
 
   // Asked for: a view that codes and builds the whole program in an imitation of VS Code, mapped to
@@ -4621,7 +4661,9 @@ if (typeof module !== 'undefined') module.exports = KK2;
   }
   DL.forEach(function (L, i) {
     if (L.start === null || L.start === undefined) return;
-    (L.targets || []).forEach(function (tg) { BEV.push({ t: bWordTime(L, tg[0]), i: i, spec: tg[1], lines: [] }); });
+    (L.targets || []).forEach(function (tg) {
+      BEV.push({ t: bWordTime(L, tg[0]), ft: tg[0] ? bWordTime(L, tg[0]) - 0.03 : L.start - 0.05, i: i, spec: tg[1], lines: [] });
+    });
   });
   BEV.sort(function (a, b) { return a.t - b.t; });
   function bRanges(spec) {
@@ -4734,6 +4776,19 @@ if (typeof module !== 'undefined') module.exports = KK2;
     var a = null;
     e.show.forEach(function (o) { if (!a && o.f === f && o.len) a = o; });
     if (!a) e.show.forEach(function (o) { if (!a && o.f === f) a = o; });
+    return a;
+  }
+  // The Koden view's place for a lyric: Bygget's, or else the first line with code that the target
+  // is about in this file (Bygget shows at most ten lines of a target).
+  function cAnchor(e, f) {
+    var a = bAnchor(e, f);
+    if (a) return a;
+    bRanges(e.spec).forEach(function (r) {
+      for (var n = r[1]; n <= r[2] && r[0] === f; n++) {
+        var o = (BLF[f] || [])[n - 1];
+        if (o && o.len && (!a || o.n < a.n)) a = o;
+      }
+    });
     return a;
   }
   function bKeepLenses(t, f, skip) {
@@ -4942,13 +4997,16 @@ if (typeof module !== 'undefined') module.exports = KK2;
   applyText();
   refreshCode();
   if (inLayout('run')) ensureRun();
+  // The page starts in Dance with an address (#...): the address waits until Dance is left.
+  dHashWaits = inDanceView() ? location.hash : '';
   danceViewChanged(document.body.classList.contains('view-dance'));
   buildTick(dAudio.currentTime);
   hudRun();
   if (document.body.classList.contains('view-dance')) dancePlay();
 
-  // The view named in the address (#...): opened when the page starts, and again when Dance is left
-  // after something was opened during it. Says whether the address named a view.
+  // The view named in the address (#...): opened when the page starts in Problem or Lösning, when
+  // Dance is left after the page started in it, and again when Dance is left after something was
+  // opened during it. Says whether the address named a view.
   function routeHash() {
   var start = DATA.order.indexOf(location.hash.slice(1));
   if (start >= 0) render(start);
@@ -4964,7 +5022,7 @@ if (typeof module !== 'undefined') module.exports = KK2;
   else return false;
   return true;
   }
-  routeHash();
+  if (!dHashWaits) routeHash();
 })();
 </script>
 </body>
